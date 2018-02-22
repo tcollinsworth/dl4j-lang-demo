@@ -30,7 +30,7 @@ public class Trainer {
 	}
 
 	public void train(Service service) {
-		nn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
+		// nn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
 	}
 
 	public void fit() throws IOException, InterruptedException {
