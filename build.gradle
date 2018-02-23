@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.deeplearning4j:deeplearning4j-core:0.9.1'
+    compile 'org.deeplearning4j:deeplearning4j-core:0.9.1'    
     compile 'org.nd4j:nd4j-native-platform:0.9.1'
     compile 'org.datavec:datavec-api:0.9.1'
     compile 'io.vertx:vertx-core:3.5.0'
