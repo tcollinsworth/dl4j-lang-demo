@@ -19,6 +19,7 @@ import com.daisyworks.demo.model.Evaluator;
 import com.daisyworks.demo.model.Inferrer;
 import com.daisyworks.demo.model.RecurrentNeuralNet;
 import com.daisyworks.demo.model.Trainer;
+import com.daisyworks.language.ParagraphFileExampleIterator;
 
 /**
  * @author troy
@@ -29,29 +30,35 @@ public class Service {
 
 	private final int PORT = 8080;
 
-	public final int iterations = 100;
-	public final double learningRate = 0.02;
-	public final double regularizationL2 = 0.00001;
+	private final int iterations = 100;
+	private final double learningRate = 0.02;
+	private final double regularizationL2 = 0.00001;
 
-	public int inputFeatureCnt; // characters
-	public int outputClassificationCnt; // classifications
+	private int inputFeatureCnt; // characters
+	private int outputClassificationCnt; // classifications
 
-	public int seed = 123;
+	private int exampleLength = 422; // TODO read from longest in dir discovered when parsing
 
-	public String[] classificationSet;
-	public Map<String, Integer> classificationNameMap = new HashMap<String, Integer>();
+	private int seed = 123;
 
-	public String[] characterSet;
-	public Map<String, Integer> charValMap = new HashMap<String, Integer>();
+	private String[] classificationSet;
+	private Map<String, Integer> classificationNameMap = new HashMap<String, Integer>();
 
-	public RecurrentNeuralNet rnn;
+	private Character[] characterSet;
+	private Map<Character, Integer> charValMap = new HashMap<Character, Integer>();
+
+	private ParagraphFileExampleIterator trainDataSetIterator;
+	private ParagraphFileExampleIterator validationDataSetIterator;
+	private ParagraphFileExampleIterator testDataSetIterator;
+
+	private RecurrentNeuralNet rnn;
 
 	// // infers or predicts classification for input observation features
-	public Inferrer inferrer = new Inferrer(rnn);
+	private Inferrer inferrer = new Inferrer(rnn);
 	// // trains/fits a neural network model based on input observations and supervised labels
-	public Trainer trainer = new Trainer(rnn);
+	private Trainer trainer = new Trainer(rnn);
 	// // evaluates the precision and accuracy of a trained model for test/validation data
-	public Evaluator evaluator = new Evaluator(rnn);
+	private Evaluator evaluator = new Evaluator(rnn);
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Service s = new Service();
@@ -64,6 +71,7 @@ public class Service {
 		s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, s.inputFeatureCnt, s.outputClassificationCnt, s.seed, s.regularizationL2);
 
 		s.loadDataSets();
+
 		// service.trainer.fit();
 
 		Vertx vertx = Vertx.vertx();
@@ -100,20 +108,27 @@ public class Service {
 	}
 
 	private void loadInputCharacterSet() throws IOException {
-		List<String> chars = new ArrayList<>();
+		List<Character> chars = new ArrayList<>();
 
 		String s = new String(Files.readAllBytes(new File("src/main/resources/examples/charMap.txt").toPath()));
 		Arrays.asList(s.split("\n")).forEach((l) -> {
 			String[] parts = l.split(":");
-
-			chars.add(parts[VAL]);
-			charValMap.put(parts[VAL], Integer.parseInt(parts[IDX]));
+			chars.add((char) Integer.parseInt(parts[VAL]));
+			charValMap.put((char) Integer.parseInt(parts[VAL]), Integer.parseInt(parts[IDX]));
 		});
-		characterSet = chars.toArray(new String[0]);
+		characterSet = chars.toArray(new Character[0]);
 		inputFeatureCnt = chars.size();
 	}
 
-	public void loadDataSets() {
-		// DefaultTokenizerFactory
+	private void loadDataSets() {
+		trainDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/train", exampleLength, charValMap, classificationSet, -1);
+
+		validationDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/validation", exampleLength, charValMap, classificationSet, -1);
+
+		testDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/test", exampleLength, charValMap, classificationSet, -1);
+
+		trainDataSetIterator.next(100);
+		validationDataSetIterator.next(100);
+		testDataSetIterator.next(100);
 	}
 }

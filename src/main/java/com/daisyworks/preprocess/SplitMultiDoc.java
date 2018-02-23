@@ -115,7 +115,7 @@ public class SplitMultiDoc {
 
 		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesCharMapFile)))) {
 			for (int i = 32; i <= 255; i++) {
-				w.write(String.format("%d:%d\n", i, i));
+				w.write(String.format("%d:%d\n", i - 32, i));
 			}
 			int[] i = { 255 };
 			Arrays.asList(uniquChars).stream().filter((c) -> c > 255).forEach((c) -> persistChar(++i[0], c, w));
@@ -124,7 +124,7 @@ public class SplitMultiDoc {
 
 	private static void persistChar(Integer i, Integer c, BufferedWriter w) {
 		try {
-			w.write(String.format("%d:%d\n", i, c));
+			w.write(String.format("%d:%d\n", i - 32, c));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
