@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.deeplearning4j.nn.api.Layer;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
@@ -16,6 +16,7 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -65,12 +66,16 @@ public class RecurrentNeuralNet {
 				.iterations(iterations) //
 				.learningRate(learningRate) //
 				.seed(seed) //
-				.updater(Updater.ADAM) //
+
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
+				.iterations(1).weightInit(WeightInit.XAVIER) //
+				.updater(new Nesterovs(0.9)) //
+
+				// .updater(Updater.ADAM) //
 				.regularization(true) //
 				.l2(regularizationL2) //
-				.weightInit(WeightInit.XAVIER) //
 				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
-				.gradientNormalizationThreshold(1.0) //
+				.gradientNormalizationThreshold(0.5) //
 				.trainingWorkspaceMode(WorkspaceMode.SINGLE) //
 				.inferenceWorkspaceMode(WorkspaceMode.SINGLE) //
 				.list() //
@@ -108,6 +113,7 @@ public class RecurrentNeuralNet {
 			totalNumParams += nParams;
 		}
 		System.out.println("Total number of network parameters: " + totalNumParams);
+		System.out.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
 
 		net.setListeners(new ScoreIterationListener(100));
 	}
