@@ -60,18 +60,18 @@ public class SplitMultiDoc {
 		File exampleDir = new File("src/main/resources/examplesRaw");
 		File[] exampleEntries = exampleDir.listFiles();
 		Arrays.stream(exampleEntries).filter((entry) -> entry.isDirectory()).forEach((dir) -> {
-			System.out.println(dir);
+			// System.out.println(dir);
 			// Iterate dirs
 				processDir(dir, newExamplesTrainDir);
 			});
 
 		Set<Integer> allCharInts = new HashSet<Integer>();
-		int[] maxCharCnt = { 0 };
+		int[] examplesMaxCharCnt = { 0 };
 		int[] maxCharInt = { 0 };
 		classesStats.forEach((cs) -> {
 			System.out.println(cs);
-			if (cs.charCnt > maxCharCnt[0]) {
-				maxCharCnt[0] = cs.charCnt;
+			if (cs.charCnt > examplesMaxCharCnt[0]) {
+				examplesMaxCharCnt[0] = cs.examplesMaxCharCnt; // .charCnt;
 			}
 			int maxClassCharInt = cs.getMaxCharInt();
 			if (maxClassCharInt > maxCharInt[0]) {
@@ -81,8 +81,8 @@ public class SplitMultiDoc {
 				allCharInts.add(i);
 			});
 		});
-		System.out.println("maxCharCnt=" + maxCharCnt[0]);
-		System.out.println("maxCharInt=" + maxCharInt[0]);
+		System.out.println("examplesMaxCharCnt=" + examplesMaxCharCnt[0]);
+		// System.out.println("maxCharInt=" + maxCharInt[0]);
 		// System.out.println("unique chars=" + allCharInts);
 		System.out.println("unique char count=" + allCharInts.size());
 		Integer[] uniquChars = allCharInts.toArray(new Integer[0]);
@@ -91,6 +91,23 @@ public class SplitMultiDoc {
 		// Create and persist map of chars for input vector - needs to be reusable.
 		// 32 - 255, then all higher map as discovered
 		persistUniqueCharMap(uniquChars);
+		persistClassificaionMap(classesStats);
+	}
+
+	private static void persistClassificaionMap(List<ClassStats> classesStats) throws FileNotFoundException, IOException {
+		File examplesClassificationMapFile = new File(newExamplesDirRelativePath + File.separator + "classificationMap.txt");
+
+		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesClassificationMapFile)))) {
+			int[] i = { 0 };
+			classesStats.stream().forEach((c) -> {
+				try {
+					w.write(String.format("%d:%s\n", i[0]++, c.classLabel));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+		}
 	}
 
 	private static void persistUniqueCharMap(Integer[] uniquChars) throws FileNotFoundException, IOException {
@@ -116,7 +133,7 @@ public class SplitMultiDoc {
 	private static void processDir(File dir, File newExamplesDir) {
 		// Open files
 		File multiDoc = new File(dir.getAbsoluteFile() + File.separator + "multiDoc");
-		System.out.println(multiDoc);
+		// System.out.println(multiDoc);
 		ClassStats classStats = new ClassStats(dir.getName());
 		classesStats.add(classStats);
 
@@ -191,20 +208,21 @@ public class SplitMultiDoc {
 			}
 			File srcFile = new File(sourceDir + File.separator + classifier + sampleNo + ".txt");
 			File dstFile = new File(destDir + File.separator + classifier + sampleNo + ".txt");
-			System.out.println(String.format("%s, %s", srcFile, dstFile));
+			// System.out.println(String.format("%s, %s", srcFile, dstFile));
 			srcFile.renameTo(dstFile);
 			++curSamples;
 			if (curSamples >= targetSamples) {
 				break;
 			}
 		}
-		System.out.println(String.format("%s, %s, %s, %d, %f, %d, %d", classifier, sourceDir, destDir, examples, samplePct, targetSamples, curSamples));
+		// System.out.println(String.format("%s, %s, %s, %d, %f, %d, %d", classifier, sourceDir, destDir, examples,
+		// samplePct, targetSamples, curSamples));
 	}
 
 	// make separate dirs for each class so like the expected data
 	private static File createExampleFile(File dir, int exampleNo) {
 		File newFile = new File(newExamplesDirRelativePath + File.separator + "train" + File.separator + dir.getName() + exampleNo + ".txt");
-		System.out.println(newFile);
+		// System.out.println(newFile);
 		return newFile;
 	}
 

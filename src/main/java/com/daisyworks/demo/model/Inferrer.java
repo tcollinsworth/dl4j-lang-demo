@@ -13,10 +13,10 @@ import com.daisyworks.demo.model.NeuralNet.Observation;
  *
  */
 public class Inferrer {
-	NeuralNet nn;
+	RecurrentNeuralNet rnn;
 
-	public Inferrer(NeuralNet nn) {
-		this.nn = nn;
+	public Inferrer(RecurrentNeuralNet rnn) {
+		this.rnn = rnn;
 	}
 
 	public Output infer(Observation f) {
@@ -29,10 +29,10 @@ public class Inferrer {
 
 		long start = System.nanoTime();
 
-		INDArray classificationProbabilities = nn.net.output(inputs);
+		INDArray classificationProbabilities = rnn.net.output(inputs);
 		// System.out.println(labelProbabilities);
 
-		int[] outputs = nn.net.predict(inputs); // 512us for 1 row
+		int[] outputs = rnn.net.predict(inputs); // 512us for 1 row
 		// System.out.println(outputs.length);
 		// System.out.println(Arrays.toString(outputs));
 		// System.out.println(nn.net.summary());

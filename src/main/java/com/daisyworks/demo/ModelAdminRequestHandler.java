@@ -30,7 +30,7 @@ public class ModelAdminRequestHandler extends RequestHandler {
 		}
 
 		if (resetModel) {
-			service.createNewDataSets();
+			// service.createNewDataSets();
 			// service.nn.initializeNewModel();
 			System.out.println("Reset model");
 		}
@@ -40,7 +40,7 @@ public class ModelAdminRequestHandler extends RequestHandler {
 				rc.response().setStatusCode(500).end("no filename");
 				return;
 			}
-			service.createNewDataSets();
+			// service.createNewDataSets();
 			// service.nn.restoreModel(modelFilename + ".zip", true);
 			// service.loadObservationData("train", modelFilename, service.trainColoData);
 			// service.loadObservationData("test", modelFilename, service.testColorData);

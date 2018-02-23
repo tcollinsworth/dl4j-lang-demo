@@ -9,10 +9,10 @@ import com.daisyworks.demo.Service;
  *
  */
 public class Evaluator {
-	NeuralNet nn;
+	RecurrentNeuralNet rnn;
 
-	public Evaluator(NeuralNet nn) {
-		this.nn = nn;
+	public Evaluator(RecurrentNeuralNet rnn) {
+		this.rnn = rnn;
 	}
 
 	public String grade(Service service) {
