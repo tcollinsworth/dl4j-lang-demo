@@ -48,6 +48,8 @@ public class Trainer {
 
 		rnn.net.fit(trainDataSetIterator);
 
+		// FIXME should use validationSet
+		//
 		// // create output for every training sample - test or validation data
 		// INDArray output = rnn.net.output(trainDataSetIterator.getFeatureMatrix());
 		// System.out.println(output);

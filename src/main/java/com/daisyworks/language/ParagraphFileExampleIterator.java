@@ -94,10 +94,18 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 			for (exampleIdx = 0; exampleIdx < examples.size(); exampleIdx++) {
 				String example = examples.get(exampleIdx);
 
+				// TODO mismatched indices wrong here
 				INDArrayIndex[] indices = new INDArrayIndex[] { //
 				NDArrayIndex.point(exampleIdx), //
 						NDArrayIndex.all(), //
 						NDArrayIndex.interval(0, example.length()) };
+
+				// FIXME bug
+				// 317 example.length
+				// 78616/317 = 248
+				// 104656 = 248*422
+				// Exception in thread "main" java.lang.IllegalStateException: Mis matched lengths: [78616] != [104656]
+
 				inputFeatureMatrix.put(indices, getExampleMatrix(example));
 
 				// for current example, set each corresponding feature mask value to 1 for the length of the example,
