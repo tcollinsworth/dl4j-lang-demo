@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 
 import com.daisyworks.demo.Service;
-import com.daisyworks.language.ParagraphFileExampleIterator;
 
 /**
  * @author troy
@@ -31,7 +31,7 @@ public class Trainer {
 		// rnn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
 	}
 
-	public void fit(ParagraphFileExampleIterator trainDataSetIterator) throws IOException, InterruptedException {
+	public void fit(DataSetIterator trainDataSetIterator) throws IOException, InterruptedException {
 		System.out.println("Fitting");
 
 		// Print the number of parameters in the network (and for each layer)

@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * Iterates src/main/resources/examplesRaw dirs. Creates a src/main/resources/examples/train dir In each dir, parses
  * multiDoc on empty line creating a new file with index and .txt, i.e., english0.txt, english1.txt Copies non-blank
@@ -24,6 +26,10 @@ import java.util.Set;
  * Stats counts size of each file in chars and reports min/max/average. so we know masking required before
  * classification ClassStats tracks all characters in file and reports so we know size of input vector
  * 
+ * @author troy
+ *
+ */
+/**
  * @author troy
  *
  */
@@ -41,7 +47,7 @@ public class SplitMultiDoc {
 		// remove old src/main/resources/examples
 		File examplesDir = new File(newExamplesDirRelativePath);
 		if (examplesDir.exists()) {
-			examplesDir.delete();
+			FileUtils.deleteDirectory(examplesDir);
 		}
 
 		// create output dirs src/main/resources/examples/train, test, validation
@@ -92,6 +98,16 @@ public class SplitMultiDoc {
 		// 10 - 255, then all higher map as discovered
 		persistUniqueCharMap(uniquChars);
 		persistClassificaionMap(classesStats);
+		persistDataSetStats(examplesMaxCharCnt[0]);
+	}
+
+	// maxExampleLength for truncating/padding
+	private static void persistDataSetStats(int maxExampleLength) throws FileNotFoundException, IOException {
+		File examplesDataSetStatsFile = new File(newExamplesDirRelativePath + File.separator + "dataSetStats.txt");
+
+		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
+			w.write(String.format("%s:%d\n", "maxExampleLength", maxExampleLength));
+		}
 	}
 
 	private static void persistClassificaionMap(List<ClassStats> classesStats) throws FileNotFoundException, IOException {
@@ -103,7 +119,6 @@ public class SplitMultiDoc {
 				try {
 					w.write(String.format("%d:%s\n", i[0]++, c.classLabel));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			});

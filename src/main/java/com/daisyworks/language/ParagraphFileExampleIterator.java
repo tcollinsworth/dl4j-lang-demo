@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -29,7 +30,8 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 	private final String dir;
 	private Set<File> consumedExamples = new HashSet<File>();
 
-	private final int exampleLength; // length to truncate or pad examples to
+	// The char length of longest example for truncating/padding
+	private final int maxExampleLength;
 
 	private final int miniBatchSize;
 
@@ -46,7 +48,7 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 	 */
 	public ParagraphFileExampleIterator(String dir, int exampleLength, Map<Character, Integer> charValMap, String[] classificationSet, int miniBatchSize) {
 		this.dir = dir;
-		this.exampleLength = exampleLength;
+		this.maxExampleLength = exampleLength;
 
 		this.charValMap = charValMap;
 		this.classificationSet = classificationSet;
@@ -65,8 +67,12 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 		try {
 			// get file list of all examples/observation files in dir
 			List<File> files = new ArrayList<>(Arrays.asList(new File(dir).listFiles()));
-			// remove what's already been consumed by iterator
 			files.removeAll(consumedExamples);
+
+			if (files.isEmpty()) {
+				throw new NoSuchElementException();
+			}
+
 			// randomize the examples/observations
 			Collections.shuffle(files);
 
@@ -76,36 +82,30 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 			while (fileIterator.hasNext() && exampleIdx++ < num) {
 				File f = fileIterator.next();
 				String example = new String(Files.readAllBytes(f.toPath()));
-				if (example.length() > exampleLength) {
-					example = example.substring(0, exampleLength); // ensure max length
+				if (example.length() > maxExampleLength) {
+					example = example.substring(0, maxExampleLength); // ensure max length
 				}
 				examples.add(example);
 				consumedExamples.add(f);
 				cursor++;
 			}
 
-			// Matrix for all examples in miniBatch
-			INDArray inputFeatureMatrix = Nd4j.create(new int[] { examples.size(), charValMap.size(), exampleLength }, 'f');
-			INDArray labelsMatrix = Nd4j.create(new int[] { examples.size(), classificationSet.length, exampleLength }, 'f');
+			INDArray inputFeatureMatrix = Nd4j.create(new int[] { examples.size(), charValMap.size(), maxExampleLength }, 'f');
+			// System.out.println(inputFeatureMatrix.shapeInfoToString());
+			INDArray labelsMatrix = Nd4j.create(new int[] { examples.size(), classificationSet.length, maxExampleLength }, 'f');
 			// Masks 1 if data present, 0 for padding
-			INDArray featuresMaskMatrix = Nd4j.zeros(examples.size(), exampleLength);
-			INDArray labelsMaskMatrix = Nd4j.zeros(examples.size(), exampleLength);
+			INDArray featuresMaskMatrix = Nd4j.zeros(examples.size(), maxExampleLength);
+			INDArray labelsMaskMatrix = Nd4j.zeros(examples.size(), maxExampleLength);
 
 			for (exampleIdx = 0; exampleIdx < examples.size(); exampleIdx++) {
 				String example = examples.get(exampleIdx);
 
-				// TODO mismatched indices wrong here
 				INDArrayIndex[] indices = new INDArrayIndex[] { //
 				NDArrayIndex.point(exampleIdx), //
 						NDArrayIndex.all(), //
-						NDArrayIndex.interval(0, example.length()) };
+						NDArrayIndex.interval(0, maxExampleLength) };
 
-				// FIXME bug
-				// 317 example.length
-				// 78616/317 = 248
-				// 104656 = 248*422
-				// Exception in thread "main" java.lang.IllegalStateException: Mis matched lengths: [78616] != [104656]
-
+				// inputFeatureMatrix.putRow(exampleIdx, getExampleMatrix(example)); //simpler, same effect/result
 				inputFeatureMatrix.put(indices, getExampleMatrix(example));
 
 				// for current example, set each corresponding feature mask value to 1 for the length of the example,
@@ -135,23 +135,18 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 	}
 
 	private INDArray getExampleMatrix(String example) {
-		INDArray exampleMatrix = Nd4j.zeros(exampleLength, charValMap.size());
-		System.out.println("***********************************");
-		System.out.println(exampleMatrix.shapeInfoToString());
-		System.out.println(example.length());
+		INDArray exampleMatrix = Nd4j.zeros(maxExampleLength, charValMap.size());
+
 		for (int exampleCharIdx = 0; exampleCharIdx < example.length(); exampleCharIdx++) {
 			Integer charMapIdx = charValMap.get(example.charAt(exampleCharIdx));
 			// if not in map for some reason, leave as zero
 			if (charMapIdx == null) {
-				// System.out.println(String.format("null %s, %d, %d, %d", example.charAt(i), (int) example.charAt(i),
-				// i, example.length()));
 				throw new RuntimeException("unrecognized example charAt " + exampleCharIdx + " " + example);
 				// continue;
 			}
 			// 1-hot encode char
 			exampleMatrix.putScalar(new int[] { exampleCharIdx, charMapIdx.intValue() }, 1);
 		}
-		System.out.println(exampleMatrix.length());
 		return exampleMatrix;
 	}
 
