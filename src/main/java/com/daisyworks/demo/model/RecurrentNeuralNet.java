@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.deeplearning4j.nn.api.Layer;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
-import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -16,7 +15,6 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -67,15 +65,15 @@ public class RecurrentNeuralNet {
 				.learningRate(learningRate) //
 				.seed(seed) //
 
-				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
+				// .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.iterations(1).weightInit(WeightInit.XAVIER) //
-				.updater(new Nesterovs(0.9)) //
+				// .updater(new Nesterovs(0.9)) //
 
-				// .updater(Updater.ADAM) //
+				.updater(Updater.ADAM) //
 				.regularization(true) //
 				.l2(regularizationL2) //
 				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
-				.gradientNormalizationThreshold(0.5) //
+				.gradientNormalizationThreshold(1.0) // 0.5
 				.trainingWorkspaceMode(WorkspaceMode.SINGLE) //
 				.inferenceWorkspaceMode(WorkspaceMode.SINGLE) //
 				.list() //
@@ -96,8 +94,8 @@ public class RecurrentNeuralNet {
 						.name("Output") //
 						.lossFunction(LossFunctions.LossFunction.MCXENT) //
 						.activation(Activation.SOFTMAX) //
-						.weightInit(WeightInit.DISTRIBUTION) //
-						.dist(new UniformDistribution(0, 1)) //
+						// .weightInit(WeightInit.DISTRIBUTION) //
+						// .dist(new UniformDistribution(0, 1)) //
 						.build()); //
 
 		MultiLayerNetwork net = new MultiLayerNetwork(listBuilder.build());

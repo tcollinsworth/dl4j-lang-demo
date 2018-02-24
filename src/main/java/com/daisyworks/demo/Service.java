@@ -54,11 +54,11 @@ public class Service {
 	private RecurrentNeuralNet rnn;
 
 	// // infers or predicts classification for input observation features
-	private Inferrer inferrer = new Inferrer(rnn);
+	private Inferrer inferrer;
 	// // trains/fits a neural network model based on input observations and supervised labels
-	private Trainer trainer = new Trainer(rnn);
+	private Trainer trainer;
 	// // evaluates the precision and accuracy of a trained model for test/validation data
-	private Evaluator evaluator = new Evaluator(rnn);
+	private Evaluator evaluator;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Service s = new Service();
@@ -70,9 +70,13 @@ public class Service {
 
 		s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, s.inputFeatureCnt, s.outputClassificationCnt, s.seed, s.regularizationL2);
 
+		s.inferrer = new Inferrer(s.rnn);
+		s.trainer = new Trainer(s.rnn);
+		s.evaluator = new Evaluator(s.rnn);
+
 		s.loadDataSets();
 
-		// service.trainer.fit();
+		s.trainer.fit(s.trainDataSetIterator);
 
 		Vertx vertx = Vertx.vertx();
 		Router router = Router.router(vertx);

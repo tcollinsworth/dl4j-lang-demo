@@ -31,9 +31,9 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 
 	private final int exampleLength; // length to truncate or pad examples to
 
-	private final int batchSize;
+	private final int miniBatchSize;
 
-	private int numExamples = -1;
+	private int numExamples = -1; // set from example file count in train/validation/test dir
 
 	private int cursor = 0;
 
@@ -44,14 +44,14 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 	 * @param inputCharSet
 	 * @param classificationSet
 	 */
-	public ParagraphFileExampleIterator(String dir, int exampleLength, Map<Character, Integer> charValMap, String[] classificationSet, int batchSize) {
+	public ParagraphFileExampleIterator(String dir, int exampleLength, Map<Character, Integer> charValMap, String[] classificationSet, int miniBatchSize) {
 		this.dir = dir;
 		this.exampleLength = exampleLength;
 
 		this.charValMap = charValMap;
 		this.classificationSet = classificationSet;
 
-		this.batchSize = batchSize;
+		this.miniBatchSize = miniBatchSize;
 	}
 
 	/**
@@ -71,55 +71,79 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 			Collections.shuffle(files);
 
 			// load each observation
-			int i = 0;
-			Iterator<File> it = files.iterator();
-			while (it.hasNext() && i++ < num) {
-				File f = it.next();
+			int exampleIdx = 0;
+			Iterator<File> fileIterator = files.iterator();
+			while (fileIterator.hasNext() && exampleIdx++ < num) {
+				File f = fileIterator.next();
 				String example = new String(Files.readAllBytes(f.toPath()));
 				if (example.length() > exampleLength) {
 					example = example.substring(0, exampleLength); // ensure max length
 				}
 				examples.add(example);
 				consumedExamples.add(f);
+				cursor++;
 			}
 
+			// Matrix for all examples in miniBatch
 			INDArray inputFeatureMatrix = Nd4j.create(new int[] { examples.size(), charValMap.size(), exampleLength }, 'f');
-			INDArray labels = Nd4j.create(new int[] { examples.size(), classificationSet.length, exampleLength }, 'f');
+			INDArray labelsMatrix = Nd4j.create(new int[] { examples.size(), classificationSet.length, exampleLength }, 'f');
 			// Masks 1 if data present, 0 for padding
-			INDArray featuresMask = Nd4j.zeros(examples.size(), exampleLength);
-			INDArray labelsMask = Nd4j.zeros(examples.size(), exampleLength);
+			INDArray featuresMaskMatrix = Nd4j.zeros(examples.size(), exampleLength);
+			INDArray labelsMaskMatrix = Nd4j.zeros(examples.size(), exampleLength);
 
-			for (i = 0; i < examples.size(); i++) {
-				String example = examples.get(i);
+			for (exampleIdx = 0; exampleIdx < examples.size(); exampleIdx++) {
+				String example = examples.get(exampleIdx);
 
 				INDArrayIndex[] indices = new INDArrayIndex[] { //
-				NDArrayIndex.point(i), //
+				NDArrayIndex.point(exampleIdx), //
 						NDArrayIndex.all(), //
-						NDArrayIndex.interval(0, exampleLength) };
+						NDArrayIndex.interval(0, example.length()) };
 				inputFeatureMatrix.put(indices, getExampleMatrix(example));
 
-				// TODO data mask vector
-				// TODO label
-				// TODO label mask
+				// for current example, set each corresponding feature mask value to 1 for the length of the example,
+				// leaving padding values 0
+				featuresMaskMatrix.get(new INDArrayIndex[] { NDArrayIndex.point(exampleIdx), NDArrayIndex.interval(0, example.length()) }).assign(1);
+
+				int classIdx = getLabelClassIdx(files.get(exampleIdx).getName());
+				int labelAtLastFeatureIdx = examples.get(exampleIdx).length() - 1;
+				labelsMatrix.putScalar(new int[] { exampleIdx, classIdx, labelAtLastFeatureIdx }, 1.0);
+
+				labelsMaskMatrix.putScalar(new int[] { exampleIdx, labelAtLastFeatureIdx }, 1.0);
 			}
 
-			return new DataSet(inputFeatureMatrix, labels, featuresMask, labelsMask);
+			return new DataSet(inputFeatureMatrix, labelsMatrix, featuresMaskMatrix, labelsMaskMatrix);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	private int getLabelClassIdx(String fileName) {
+		for (int classIdx = 0; classIdx < classificationSet.length; classIdx++) {
+			if (fileName.startsWith(classificationSet[classIdx])) {
+				return classIdx;
+			}
+		}
+		throw new RuntimeException("classification not found for " + fileName);
+	}
+
 	private INDArray getExampleMatrix(String example) {
 		INDArray exampleMatrix = Nd4j.zeros(exampleLength, charValMap.size());
-		for (int i = 0; i < example.length(); i++) {
-			Integer charIdx = charValMap.get(example.charAt(i));
+		System.out.println("***********************************");
+		System.out.println(exampleMatrix.shapeInfoToString());
+		System.out.println(example.length());
+		for (int exampleCharIdx = 0; exampleCharIdx < example.length(); exampleCharIdx++) {
+			Integer charMapIdx = charValMap.get(example.charAt(exampleCharIdx));
 			// if not in map for some reason, leave as zero
-			if (charIdx == null) {
-				continue;
+			if (charMapIdx == null) {
+				// System.out.println(String.format("null %s, %d, %d, %d", example.charAt(i), (int) example.charAt(i),
+				// i, example.length()));
+				throw new RuntimeException("unrecognized example charAt " + exampleCharIdx + " " + example);
+				// continue;
 			}
 			// 1-hot encode char
-			exampleMatrix.putScalar(new int[] { i, charIdx.intValue() }, 1);
+			exampleMatrix.putScalar(new int[] { exampleCharIdx, charMapIdx.intValue() }, 1);
 		}
+		System.out.println(exampleMatrix.length());
 		return exampleMatrix;
 	}
 
@@ -130,7 +154,7 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 
 	@Override
 	public DataSet next() {
-		return next(batchSize);
+		return next(miniBatchSize);
 	}
 
 	@Override
@@ -169,7 +193,7 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 
 	@Override
 	public int batch() {
-		return batchSize;
+		return miniBatchSize;
 	}
 
 	@Override

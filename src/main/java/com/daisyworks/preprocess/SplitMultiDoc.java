@@ -89,7 +89,7 @@ public class SplitMultiDoc {
 		Arrays.sort(uniquChars);
 		System.out.println("unique chars=" + Arrays.toString(uniquChars));
 		// Create and persist map of chars for input vector - needs to be reusable.
-		// 32 - 255, then all higher map as discovered
+		// 10 - 255, then all higher map as discovered
 		persistUniqueCharMap(uniquChars);
 		persistClassificaionMap(classesStats);
 	}
@@ -114,8 +114,8 @@ public class SplitMultiDoc {
 		File examplesCharMapFile = new File(newExamplesDirRelativePath + File.separator + "charMap.txt");
 
 		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesCharMapFile)))) {
-			for (int i = 32; i <= 255; i++) {
-				w.write(String.format("%d:%d\n", i - 32, i));
+			for (int i = 10; i <= 255; i++) {
+				w.write(String.format("%d:%d\n", i - 10, i));
 			}
 			int[] i = { 255 };
 			Arrays.asList(uniquChars).stream().filter((c) -> c > 255).forEach((c) -> persistChar(++i[0], c, w));
@@ -124,7 +124,7 @@ public class SplitMultiDoc {
 
 	private static void persistChar(Integer i, Integer c, BufferedWriter w) {
 		try {
-			w.write(String.format("%d:%d\n", i - 32, c));
+			w.write(String.format("%d:%d\n", i - 10, c));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

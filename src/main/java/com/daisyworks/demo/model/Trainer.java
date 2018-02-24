@@ -1,23 +1,13 @@
 package com.daisyworks.demo.model;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.datavec.api.records.reader.RecordReader;
-import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
-import org.datavec.api.split.FileSplit;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.io.ClassPathResource;
 
 import com.daisyworks.demo.Service;
+import com.daisyworks.language.ParagraphFileExampleIterator;
 
 /**
  * @author troy
@@ -38,41 +28,10 @@ public class Trainer {
 	}
 
 	public void train(Service service) {
-		// nn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
+		// rnn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
 	}
 
-	public void fit() throws IOException, InterruptedException {
-		System.out.println("Reading training data");
-
-		int skipNumLines = 1;
-		char delimiter = ',';
-
-		RecordReader recordReader = new CSVRecordReader(skipNumLines, delimiter);
-		recordReader.initialize(new FileSplit(new ClassPathResource("color-data.csv").getFile()));
-
-		int labelIndex = 5;
-		int numClasses = 11;
-		int batchSize = 30;
-
-		DataSetIterator iterator = new RecordReaderDataSetIterator(recordReader, batchSize, labelIndex, numClasses);
-		DataSet allData = iterator.next();
-
-		List<String> labelNames = new ArrayList<>();
-		labelNames.add("white");
-		labelNames.add("grey");
-		labelNames.add("black");
-		labelNames.add("brown");
-		labelNames.add("red");
-		labelNames.add("orange");
-		labelNames.add("yellow");
-		labelNames.add("green");
-		labelNames.add("blue");
-		labelNames.add("violet");
-		labelNames.add("pink");
-		allData.setLabelNames(labelNames);
-
-		System.out.println(allData);
-
+	public void fit(ParagraphFileExampleIterator trainDataSetIterator) throws IOException, InterruptedException {
 		System.out.println("Fitting");
 
 		// Print the number of parameters in the network (and for each layer)
@@ -87,16 +46,16 @@ public class Trainer {
 
 		rnn.net.setListeners(new ScoreIterationListener(100));
 
-		rnn.net.fit(allData);
+		rnn.net.fit(trainDataSetIterator);
 
-		// create output for every training sample - test or validation data
-		INDArray output = rnn.net.output(allData.getFeatureMatrix());
-		System.out.println(output);
-
-		// let Evaluation prints stats how often the right output had the
-		// highest value
-		Evaluation eval = new Evaluation(11);
-		eval.eval(rnn.net.getLabels(), output);
-		System.out.println(eval.stats());
+		// // create output for every training sample - test or validation data
+		// INDArray output = rnn.net.output(trainDataSetIterator.getFeatureMatrix());
+		// System.out.println(output);
+		//
+		// // let Evaluation print stats how often the right output had the
+		// // highest value
+		// Evaluation eval = new Evaluation(11);
+		// eval.eval(rnn.net.getLabels(), output);
+		// System.out.println(eval.stats());
 	}
 }
