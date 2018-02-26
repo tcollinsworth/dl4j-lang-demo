@@ -1,6 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+apply plugin: 'application'
+//https://docs.gradle.org/current/userguide/application_plugin.html
 
 repositories {
   //jcenter()
@@ -41,3 +43,7 @@ idea{
         downloadSources = true
     }
 }
+
+//mainClassName = "com.daisyworks.demo.Service"
+mainClassName = "com.daisyworks.preprocess.SplitMultiDoc"
+
