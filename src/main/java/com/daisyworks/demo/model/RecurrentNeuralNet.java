@@ -13,7 +13,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -59,7 +58,7 @@ public class RecurrentNeuralNet {
 	 * Create a brand new model.
 	 */
 	public void initializeNewModel() {
-		int hiddenNodes = 10;
+		int hiddenNodes = 20;
 		// int tbpttLength = 50;
 
 		NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder() //
@@ -69,8 +68,8 @@ public class RecurrentNeuralNet {
 
 				// .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.weightInit(WeightInit.XAVIER) //
-				.updater(new Nesterovs(0.9)) //
-				// .dropOut(0.5)
+				// .updater(new Nesterovs(0.9)) //
+				// .dropOut(0.1)
 
 				.updater(Updater.ADAM) //
 				.regularization(true) //
