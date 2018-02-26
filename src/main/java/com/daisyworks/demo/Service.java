@@ -24,10 +24,10 @@ import com.daisyworks.language.DataLoader;
 public class Service {
 	private final int PORT = 8080;
 
-	public int miniBatchSize = 10;
+	public int miniBatchSize = 385;
 	private int seed = 123;
-	private final int iterations = 1;
-	private final double learningRate = 0.02;
+	private final int iterations = 10;
+	private final double learningRate = 0.1; // 0.1; // 0.02;
 	private final double regularizationL2 = 0.00001;
 
 	public int inputFeatureCnt; // characters
@@ -46,14 +46,14 @@ public class Service {
 	public DataSetIterator validationDataSetIterator;
 	public DataSetIterator testDataSetIterator;
 
-	private RecurrentNeuralNet rnn;
+	public RecurrentNeuralNet rnn;
 
 	// // infers or predicts classification for input observation features
-	private Inferrer inferrer;
+	public Inferrer inferrer;
 	// // trains/fits a neural network model based on input observations and supervised labels
-	private Trainer trainer;
+	public Trainer trainer;
 	// // evaluates the precision and accuracy of a trained model for test/validation data
-	private Evaluator evaluator;
+	public Evaluator evaluator;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Service s = new Service();
@@ -62,19 +62,38 @@ public class Service {
 
 		DataLoader dataLoader = new DataLoader(s);
 
-		dataLoader.loadInputCharacterSet();
 		dataLoader.loadOutputClassificationSet();
 		dataLoader.loadDataSetStats();
-		dataLoader.loadDataSets();
 
-		s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, s.inputFeatureCnt, s.outputClassificationCnt, s.seed, s.regularizationL2);
+		// dataLoader.loadInputCharacterSet();
+		// dataLoader.load1HotDataSets();
+		// s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, s.inputFeatureCnt, s.outputClassificationCnt,
+		// s.seed, s.regularizationL2);
+
+		dataLoader.loadDoubleEncodedDataSets();
+		s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, 1, s.outputClassificationCnt, s.seed, s.regularizationL2);
 
 		s.inferrer = new Inferrer(s.rnn);
 		s.trainer = new Trainer(s.rnn);
-		s.evaluator = new Evaluator(s.rnn);
+		s.evaluator = new Evaluator(s.rnn, s.trainDataSetIterator, s.validationDataSetIterator, s.testDataSetIterator);
 
-		for (int i = 0; i < 100; i++) {
+		s.evaluator.createAndRegisterEvaluationReporter();
+
+		Evaluator.printStatsHeader();
+		s.evaluator.printStats();
+
+		for (int i = 0; i < 100000; i++) {
+			s.trainDataSetIterator.reset();
+			s.validationDataSetIterator.reset();
+			s.testDataSetIterator.reset();
+
 			s.trainer.fit(s.trainDataSetIterator);
+
+			s.trainDataSetIterator.reset();
+			s.validationDataSetIterator.reset();
+			s.testDataSetIterator.reset();
+
+			s.evaluator.printStats();
 		}
 
 		Vertx vertx = Vertx.vertx();

@@ -21,7 +21,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
-public class ParagraphFileExampleIterator implements DataSetIterator {
+public class ParagraphFile1HotExampleIterator implements DataSetIterator {
 	private static final long serialVersionUID = 1L;
 
 	private final Map<Character, Integer> charValMap;
@@ -46,7 +46,7 @@ public class ParagraphFileExampleIterator implements DataSetIterator {
 	 * @param inputCharSet
 	 * @param classificationSet
 	 */
-	public ParagraphFileExampleIterator(String dir, int exampleLength, Map<Character, Integer> charValMap, String[] classificationSet, int miniBatchSize) {
+	public ParagraphFile1HotExampleIterator(String dir, int exampleLength, Map<Character, Integer> charValMap, String[] classificationSet, int miniBatchSize) {
 		this.dir = dir;
 		this.maxExampleLength = exampleLength;
 

@@ -56,18 +56,25 @@ public class DataLoader {
 		svc.inputFeatureCnt = chars.size();
 	}
 
-	public void loadDataSets() {
-		svc.trainDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/train", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
+	public void load1HotDataSets() {
+		svc.trainDataSetIterator = new ParagraphFile1HotExampleIterator("src/main/resources/examples/train", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
 				svc.miniBatchSize);
 
-		svc.validationDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/validation", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
+		svc.validationDataSetIterator = new ParagraphFile1HotExampleIterator("src/main/resources/examples/validation", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
 				svc.miniBatchSize);
 
-		svc.testDataSetIterator = new ParagraphFileExampleIterator("src/main/resources/examples/test", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
+		svc.testDataSetIterator = new ParagraphFile1HotExampleIterator("src/main/resources/examples/test", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
+				svc.miniBatchSize);
+	}
+
+	public void loadDoubleEncodedDataSets() {
+		svc.trainDataSetIterator = new ParagraphFileDoubleEncodedExampleIterator("src/main/resources/examples/train", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
 				svc.miniBatchSize);
 
-		svc.trainDataSetIterator.next(100);
-		svc.validationDataSetIterator.next(100);
-		svc.testDataSetIterator.next(100);
+		svc.validationDataSetIterator = new ParagraphFileDoubleEncodedExampleIterator("src/main/resources/examples/validation", svc.maxExampleLength, svc.charValMap,
+				svc.classificationSet, svc.miniBatchSize);
+
+		svc.testDataSetIterator = new ParagraphFileDoubleEncodedExampleIterator("src/main/resources/examples/test", svc.maxExampleLength, svc.charValMap, svc.classificationSet,
+				svc.miniBatchSize);
 	}
 }
