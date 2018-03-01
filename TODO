@@ -1,0 +1,17 @@
+-update
+cache file data so not rereading from disk
+get word length histogram stats
+add per word vectorization
+
+add per 1/2/n sliding window word examples
+every word becomes example
+every example sliding window pair of words becomes example
+every example sliding window 3 words becomes example
+
+
+create more examples
+-----------------------------
+read from sentence generator
+call translate
+persist
+
