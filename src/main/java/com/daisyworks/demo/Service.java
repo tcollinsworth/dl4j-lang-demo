@@ -60,6 +60,8 @@ public class Service {
 		// for development, also requires staticHandler.setCacheEntryTimeout(1) and browser cache disable
 		System.setProperty("vertx.disableFileCaching", "true");
 
+		// TODO change dataLoader to DataSwizzler
+		// TODO then pass dataSet, classifications, etc. to ExampleDataSetsDoubleEncoderIterator
 		DataLoader dataLoader = new DataLoader(s);
 
 		dataLoader.loadOutputClassificationSet();

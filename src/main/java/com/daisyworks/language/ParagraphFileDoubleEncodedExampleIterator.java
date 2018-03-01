@@ -146,7 +146,6 @@ public class ParagraphFileDoubleEncodedExampleIterator implements DataSetIterato
 				throw new RuntimeException("unrecognized example charAt " + exampleCharIdx + " " + example);
 				// continue;
 			}
-			// 1-hot encode char
 			exampleMatrix.putScalar(new int[] { exampleCharIdx, 0 }, charMapIdx.intValue());
 		}
 		// System.out.println("exampleMatrix " + exampleMatrix.shapeInfoToString());

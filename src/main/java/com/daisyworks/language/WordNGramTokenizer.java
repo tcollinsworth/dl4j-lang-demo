@@ -23,7 +23,7 @@ public class WordNGramTokenizer {
 					nGram.append(w);
 					nGram.append(' ');
 				});
-				ngrams.add(nGram.toString());
+				ngrams.add(nGram.toString().trim());
 			}
 		}
 	}
