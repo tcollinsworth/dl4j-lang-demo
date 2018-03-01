@@ -59,6 +59,9 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 	public DataSet next(int num) {
 		List<Pair<String, String>> miniBatch = getMiniBatchExamples(num);
 		Log.debug("next {} cursor {} miniBatchSize {}", num, cursor, miniBatch.size());
+		if (cursor == numExamples - 1) {
+			return null;
+		}
 		DataSet ds = getDataSet(miniBatch);
 		return ds;
 	}
@@ -102,8 +105,9 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 	}
 
 	private List<Pair<String, String>> getMiniBatchExamples(int num) {
+		int endCursor = cursor + num;
 		List<Pair<String, String>> miniBatch = new ArrayList<>();
-		for (; cursor < dataSet.size() - 1; cursor++) {
+		for (; cursor < dataSet.size() - 1 && cursor < endCursor; cursor++) {
 			miniBatch.add(dataSet.get(cursor));
 		}
 		return miniBatch;
@@ -131,7 +135,7 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 
 	@Override
 	public boolean hasNext() {
-		return cursor < numExamples();
+		return cursor + 1 < numExamples();
 	}
 
 	@Override

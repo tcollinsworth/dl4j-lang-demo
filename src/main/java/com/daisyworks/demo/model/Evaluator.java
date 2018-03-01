@@ -47,11 +47,15 @@ public class Evaluator {
 		Evaluation trainEval = rnn.net.evaluate(trainDataSetIterator);
 		// This is used to tune various model architecture hyperparameters, which could lead to overfitting
 		Evaluation valEval = rnn.net.evaluate(validationDataSetIterator);
-		// This is never used to tune models and is only used for inter-model evaluation
-		Evaluation testEval = rnn.net.evaluate(testDataSetIterator);
 
-		System.out.println(String.format("%s %d %f %f %f %f %f %f %f %f %f %f", new Date().toString(), lastIteration + 1, lastIterationScore, trainEval.accuracy(), trainEval.f1(),
-				trainEval.precision(), valEval.accuracy(), valEval.f1(), valEval.precision(), testEval.accuracy(), testEval.f1(), testEval.precision()));
+		if (testDataSetIterator != null) {
+			// This is never used to tune models and is only used for inter-model evaluation
+			Evaluation testEval = rnn.net.evaluate(testDataSetIterator);
+			// TODO print results
+		}
+
+		System.out.println(String.format("%s %d %f %f %f %f %f %f %f", new Date().toString(), lastIteration + 1, lastIterationScore, trainEval.accuracy(), trainEval.f1(),
+				trainEval.precision(), valEval.accuracy(), valEval.f1(), valEval.precision()));
 	}
 
 	class EvaluationReporter implements IterationListener {

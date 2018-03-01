@@ -61,7 +61,7 @@ public class DataSwizzler {
 		ds.loadData();
 	}
 
-	private void loadData() throws FileNotFoundException, IOException {
+	public void loadData() throws FileNotFoundException, IOException {
 		File rootDir = new File(newExamplesDirRelativePath);
 		if (!rootDir.exists()) {
 			rootDir.mkdirs();
@@ -158,13 +158,16 @@ public class DataSwizzler {
 
 	private void loadParsePersistRawExamples() throws FileNotFoundException, IOException {
 		Log.info("Loading, parsing, splitting, persisting new examples");
-		Arrays.asList(examplesRawRootDir).forEach((dir) -> {
-			String classification = new File(dir).getName();
-			Set<String> ngrams = getNgrams(dir, minNgramWords, maxNgramWords);
-			String longestNgram = ngrams.stream().max((a, b) -> Integer.compare(a.length(), b.length())).get();
-			examplesMaxCharLength = longestNgram.length() > examplesMaxCharLength ? longestNgram.length() : examplesMaxCharLength;
-			randomSplitSampleData(classification, ngrams);
-		});
+		File examplesRawRootDirFile = new File(examplesRawRootDir);
+		Log.info("{}", Arrays.asList(examplesRawRootDirFile.list()));
+		Arrays.asList(examplesRawRootDirFile.list()).stream() //
+				.filter((classificationDir) -> new File(examplesRawRootDir + File.separator + classificationDir).isDirectory()) //
+				.forEach((classificationDir) -> {
+					Set<String> ngrams = getNgrams(examplesRawRootDir + File.separator + classificationDir, minNgramWords, maxNgramWords);
+					String longestNgram = ngrams.stream().max((a, b) -> Integer.compare(a.length(), b.length())).get();
+					examplesMaxCharLength = longestNgram.length() > examplesMaxCharLength ? longestNgram.length() : examplesMaxCharLength;
+					randomSplitSampleData(classificationDir, ngrams);
+				});
 		persistDataSetStats(examplesMaxCharLength);
 		persistDataSets();
 	}
@@ -234,5 +237,17 @@ public class DataSwizzler {
 			}
 		}
 		return Collections.emptySet();
+	}
+
+	public int getMaxCharLength() {
+		return examplesMaxCharLength;
+	}
+
+	public List<Pair<String, String>> getDataSet(String dataSetName) {
+		return dataSets.get(dataSetName);
+	}
+
+	public Set<String> getClassificationSet() {
+		return classifications;
 	}
 }

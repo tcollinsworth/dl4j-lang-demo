@@ -21,6 +21,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+@Deprecated
 public class ParagraphFileDoubleEncodedExampleIterator implements DataSetIterator {
 	private static final long serialVersionUID = 1L;
 

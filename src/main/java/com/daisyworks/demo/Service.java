@@ -7,8 +7,6 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
@@ -16,16 +14,22 @@ import com.daisyworks.demo.model.Evaluator;
 import com.daisyworks.demo.model.Inferrer;
 import com.daisyworks.demo.model.RecurrentNeuralNet;
 import com.daisyworks.demo.model.Trainer;
-import com.daisyworks.language.DataLoader;
+import com.daisyworks.language.DataSwizzler;
+import com.daisyworks.language.ExampleCharSeqAsDoubleEncodedVectorDataSetIterator;
 
 /**
  * @author troy
  */
 public class Service {
+	private final String examplesRawRootDir = "src/main/resources/examplesRaw";
+	private final double validationRatio = 0.25;
+	private final int minNgramWords = 1;
+	private final int maxNgramWords = 5;
+
 	private final int PORT = 8080;
 
-	public int miniBatchSize = 385;
-	private int seed = 123;
+	public final int miniBatchSize = 10;
+	private final int seed = 123;
 	private final int iterations = 10;
 	private final double learningRate = 0.1; // 0.1; // 0.02;
 	private final double regularizationL2 = 0.00001;
@@ -35,12 +39,6 @@ public class Service {
 
 	// The char length of longest example for truncating/padding
 	public int maxExampleLength;
-
-	public String[] classificationSet;
-	public Map<String, Integer> classificationNameMap = new HashMap<String, Integer>();
-
-	public Character[] characterSet;
-	public Map<Character, Integer> charValMap = new HashMap<Character, Integer>();
 
 	public DataSetIterator trainDataSetIterator;
 	public DataSetIterator validationDataSetIterator;
@@ -55,47 +53,57 @@ public class Service {
 	// // evaluates the precision and accuracy of a trained model for test/validation data
 	public Evaluator evaluator;
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException {
 		Service s = new Service();
+		s.main();
+	}
+
+	private void main() throws IOException {
 		// for development, also requires staticHandler.setCacheEntryTimeout(1) and browser cache disable
 		System.setProperty("vertx.disableFileCaching", "true");
 
-		// TODO change dataLoader to DataSwizzler
-		// TODO then pass dataSet, classifications, etc. to ExampleDataSetsDoubleEncoderIterator
-		DataLoader dataLoader = new DataLoader(s);
+		DataSwizzler swizzler = new DataSwizzler(examplesRawRootDir, validationRatio, minNgramWords, maxNgramWords);
+		swizzler.loadData();
 
-		dataLoader.loadOutputClassificationSet();
-		dataLoader.loadDataSetStats();
+		outputClassificationCnt = swizzler.getClassificationSet().size();
 
-		// dataLoader.loadInputCharacterSet();
-		// dataLoader.load1HotDataSets();
-		// s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, s.inputFeatureCnt, s.outputClassificationCnt,
-		// s.seed, s.regularizationL2);
+		trainDataSetIterator = new ExampleCharSeqAsDoubleEncodedVectorDataSetIterator( //
+				"train", //
+				swizzler.getMaxCharLength(), //
+				swizzler.getDataSet("train"), //
+				swizzler.getClassificationSet(), //
+				miniBatchSize);
 
-		dataLoader.loadDoubleEncodedDataSets();
-		s.rnn = new RecurrentNeuralNet(s.iterations, s.learningRate, 1, s.outputClassificationCnt, s.seed, s.regularizationL2);
+		validationDataSetIterator = new ExampleCharSeqAsDoubleEncodedVectorDataSetIterator( //
+				"validation", //
+				swizzler.getMaxCharLength(), //
+				swizzler.getDataSet("validation"), //
+				swizzler.getClassificationSet(), //
+				miniBatchSize);
 
-		s.inferrer = new Inferrer(s.rnn);
-		s.trainer = new Trainer(s.rnn);
-		s.evaluator = new Evaluator(s.rnn, s.trainDataSetIterator, s.validationDataSetIterator, s.testDataSetIterator);
+		rnn = new RecurrentNeuralNet(iterations, learningRate, 1, outputClassificationCnt, seed, regularizationL2);
 
-		s.evaluator.createAndRegisterEvaluationReporter();
+		inferrer = new Inferrer(rnn);
+		trainer = new Trainer(rnn);
+		evaluator = new Evaluator(rnn, trainDataSetIterator, validationDataSetIterator, testDataSetIterator);
+
+		evaluator.createAndRegisterEvaluationReporter();
 
 		Evaluator.printStatsHeader();
-		s.evaluator.printStats();
+		evaluator.printStats();
 
 		for (int i = 0; i < 100000; i++) {
-			s.trainDataSetIterator.reset();
-			s.validationDataSetIterator.reset();
-			s.testDataSetIterator.reset();
+			trainDataSetIterator.reset();
+			validationDataSetIterator.reset();
+			// testDataSetIterator.reset();
 
-			s.trainer.fit(s.trainDataSetIterator);
+			trainer.fit(trainDataSetIterator);
 
-			s.trainDataSetIterator.reset();
-			s.validationDataSetIterator.reset();
-			s.testDataSetIterator.reset();
+			trainDataSetIterator.reset();
+			validationDataSetIterator.reset();
+			// testDataSetIterator.reset();
 
-			s.evaluator.printStats();
+			evaluator.printStats();
 		}
 
 		Vertx vertx = Vertx.vertx();
@@ -103,12 +111,12 @@ public class Service {
 		router.route().handler(BodyHandler.create());
 		// router.route(HttpMethod.POST, "/color-train-validate").blockingHandler(routingContext -> new
 		// ColorRequestHandler(routingContext, service));
-		router.route(HttpMethod.POST, "/modelAdmin").blockingHandler(routingContext -> new ModelAdminRequestHandler(routingContext, s));
+		router.route(HttpMethod.POST, "/modelAdmin").blockingHandler(routingContext -> new ModelAdminRequestHandler(routingContext, this));
 		router.route("/*").handler(StaticHandler.create().setCacheEntryTimeout(1));
 
-		vertx.createHttpServer().requestHandler(router::accept).listen(s.PORT, res -> {
+		vertx.createHttpServer().requestHandler(router::accept).listen(PORT, res -> {
 			if (res.succeeded()) {
-				System.out.println("Listening: " + s.PORT);
+				System.out.println("Listening: " + PORT);
 			} else {
 				System.out.println("Failed to launch server: " + res.cause());
 				System.exit(-1);
