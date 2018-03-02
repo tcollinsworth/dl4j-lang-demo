@@ -58,7 +58,7 @@ public class RecurrentNeuralNet {
 	 * Create a brand new model.
 	 */
 	public void initializeNewModel() {
-		int hiddenNodes = 20;
+		int hiddenNodes = 40;
 		// int tbpttLength = 50;
 
 		NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder() //

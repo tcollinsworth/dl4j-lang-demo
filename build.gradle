@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compile 'org.deeplearning4j:deeplearning4j-core:0.9.1'    
-    compile 'org.nd4j:nd4j-native-platform:0.9.1'
+    compile 'org.nd4j:nd4j-native-platform:0.9.1' // GPU was training slower
     //compile 'org.nd4j:nd4j-cuda-8.0-platform:0.9.1' // reverts to CPU if GPU or compatible drivers/libs unavailable
     compile 'org.datavec:datavec-api:0.9.1'
     compile 'org.deeplearning4j:deeplearning4j-nlp:0.9.1'
