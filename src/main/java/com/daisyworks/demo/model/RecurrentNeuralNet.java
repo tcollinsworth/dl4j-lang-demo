@@ -4,15 +4,16 @@ import java.io.File;
 import java.io.IOException;
 
 import org.deeplearning4j.nn.api.Layer;
-import org.deeplearning4j.nn.conf.GradientNormalization;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -59,23 +60,24 @@ public class RecurrentNeuralNet {
 	 */
 	public void initializeNewModel() {
 		int hiddenNodes = 40;
-		// int tbpttLength = 50;
+		int tbpttLength = 50;
 
 		NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder() //
 				.iterations(iterations) //
 				.learningRate(learningRate) //
 				.seed(seed) //
 
-				// .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.weightInit(WeightInit.XAVIER) //
 				// .updater(new Nesterovs(0.9)) //
 				// .dropOut(0.1)
 
-				.updater(Updater.ADAM) //
+				.updater(new RmsProp(0.95))
+				// .updater(Updater.ADAM) //
 				.regularization(true) //
 				.l2(regularizationL2) //
-				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
-				.gradientNormalizationThreshold(1.0) // 0.5 1.0
+				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
+				// .gradientNormalizationThreshold(1.0) // 0.5 1.0
 				// .trainingWorkspaceMode(WorkspaceMode.SINGLE) //
 				// .inferenceWorkspaceMode(WorkspaceMode.SINGLE) //
 				.list() //
@@ -90,7 +92,14 @@ public class RecurrentNeuralNet {
 						.activation(Activation.TANH) //
 						.build()) //
 
-				.layer(1, new RnnOutputLayer.Builder() //
+				.layer(1, new GravesLSTM.Builder() //
+						.nIn(hiddenNodes) //
+						.nOut(hiddenNodes) //
+						.name("Hidden") //
+						.activation(Activation.TANH) //
+						.build()) //
+
+				.layer(2, new RnnOutputLayer.Builder() //
 						.nIn(hiddenNodes) //
 						.nOut(outputClassificationCnt) //
 						.name("Output") //
@@ -123,10 +132,10 @@ public class RecurrentNeuralNet {
 		// // .weightInit(WeightInit.DISTRIBUTION) //
 		// // .dist(new UniformDistribution(0, 1)) //
 		// .build()); //
-		// listBuilder //
-		// .backpropType(BackpropType.TruncatedBPTT) //
-		// .tBPTTBackwardLength(tbpttLength) //
-		// .tBPTTForwardLength(tbpttLength);
+		listBuilder //
+				.backpropType(BackpropType.TruncatedBPTT) //
+				.tBPTTBackwardLength(tbpttLength) //
+				.tBPTTForwardLength(tbpttLength);
 
 		MultiLayerNetwork net = new MultiLayerNetwork(listBuilder.build());
 		net.init();

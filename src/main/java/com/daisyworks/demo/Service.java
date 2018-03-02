@@ -28,10 +28,10 @@ public class Service {
 
 	private final int PORT = 8080;
 
-	public final int miniBatchSize = 10;
+	public final int miniBatchSize = 32;
 	private final int seed = 123;
 	private final int iterations = 1;
-	private final double learningRate = 0.02; // 0.1; // 0.02;
+	private final double learningRate = 0.1; // 0.1; // 0.02;
 	private final double regularizationL2 = 0.00001;
 
 	public int inputFeatureCnt; // characters
@@ -95,7 +95,7 @@ public class Service {
 		evaluator.printStats();
 
 		for (int i = 0; i < 100000; i++) {
-			long start = System.currentTimeMillis();
+			// long start = System.currentTimeMillis();
 			trainDataSetIterator.reset();
 			validationDataSetIterator.reset();
 			// testDataSetIterator.reset();
@@ -107,11 +107,12 @@ public class Service {
 			// testDataSetIterator.reset();
 
 			double valAccuracy = evaluator.printStats();
-			if (i % 1 == 0) {
+			if (i % 10 == 0) {
 				boolean saveUpdater = true;
 				rnn.saveModel("src/main/resources/models/model-iteration-" + i + "-valAccuracy-" + valAccuracy, saveUpdater);
 			}
-			System.out.println("interation train eval time " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+			// System.out.println("interation train eval time " + ((System.currentTimeMillis() - start) / 1000) +
+			// " sec");
 		}
 
 		Vertx vertx = Vertx.vertx();
