@@ -43,7 +43,7 @@ public class Evaluator {
 		System.out.println("date, iteration, score, trainAccuracy, trainF1, trainPrecision, valAccuracy, valF1, valPrecision, testAccuracy, testF1, testPrecision");
 	}
 
-	public void printStats() {
+	public double printStats() {
 		Evaluation trainEval = rnn.net.evaluate(trainDataSetIterator);
 		// This is used to tune various model architecture hyperparameters, which could lead to overfitting
 		Evaluation valEval = rnn.net.evaluate(validationDataSetIterator);
@@ -56,6 +56,7 @@ public class Evaluator {
 
 		System.out.println(String.format("%s %d %f %f %f %f %f %f %f", new Date().toString(), lastIteration + 1, lastIterationScore, trainEval.accuracy(), trainEval.f1(),
 				trainEval.precision(), valEval.accuracy(), valEval.f1(), valEval.precision()));
+		return valEval.accuracy();
 	}
 
 	class EvaluationReporter implements IterationListener {

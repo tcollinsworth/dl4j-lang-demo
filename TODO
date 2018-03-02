@@ -1,3 +1,13 @@
+Create/persist/load unique char map
+
+persist model every 'n' training iterations
+
+load model feature
+
+inference endpoint
+
+more examples
+
 train/evaluate
 create demo UI
 support adding additional training examples

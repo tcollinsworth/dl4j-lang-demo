@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,6 +28,8 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 	private final Set<String> classificationSet;
 	private final String[] classifications;
 
+	private final Map<Character, Double> charMap;
+
 	// The char length of longest example for truncating/padding
 	private final int exampleMaxCharLength;
 
@@ -41,13 +44,15 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 			int exampleMaxCharLength, //
 			List<Pair<String, String>> dataSet, //
 			Set<String> classificationSet, //
-			int miniBatchSize) {
+			int miniBatchSize, //
+			Map<Character, Double> charMap) {
 		this.dataSetName = dataSetName;
 		this.dataSet = dataSet;
 		this.exampleMaxCharLength = exampleMaxCharLength;
 		this.classificationSet = classificationSet;
 		classifications = classificationSet.toArray(new String[0]);
 		this.miniBatchSize = miniBatchSize;
+		this.charMap = charMap;
 	}
 
 	/**
@@ -127,7 +132,8 @@ public class ExampleCharSeqAsDoubleEncodedVectorDataSetIterator implements DataS
 
 		// iterate the example char sequence
 		for (int exampleCharIdx = 0; exampleCharIdx < example.length(); exampleCharIdx++) {
-			exampleMatrix.putScalar(new int[] { exampleCharIdx, 0 }, (int) example.charAt(exampleCharIdx));
+			double uniqueCharIdx = charMap.get(example.charAt(exampleCharIdx));
+			exampleMatrix.putScalar(new int[] { exampleCharIdx, 0 }, uniqueCharIdx);
 		}
 		Log.debug("exampleMatrix {}", exampleMatrix.shapeInfoToString());
 		return exampleMatrix;

@@ -24,14 +24,14 @@ public class Service {
 	private final String examplesRawRootDir = "src/main/resources/examplesRaw";
 	private final double validationRatio = 0.25;
 	private final int minNgramWords = 1;
-	private final int maxNgramWords = 5;
+	private final int maxNgramWords = 3;
 
 	private final int PORT = 8080;
 
-	public final int miniBatchSize = 50;
+	public final int miniBatchSize = 10;
 	private final int seed = 123;
-	private final int iterations = 10;
-	private final double learningRate = 0.1; // 0.1; // 0.02;
+	private final int iterations = 1;
+	private final double learningRate = 0.02; // 0.1; // 0.02;
 	private final double regularizationL2 = 0.00001;
 
 	public int inputFeatureCnt; // characters
@@ -72,14 +72,16 @@ public class Service {
 				swizzler.getMaxCharLength(), //
 				swizzler.getDataSet("train"), //
 				swizzler.getClassificationSet(), //
-				miniBatchSize);
+				miniBatchSize, //
+				swizzler.getCharMap());
 
 		validationDataSetIterator = new ExampleCharSeqAsDoubleEncodedVectorDataSetIterator( //
 				"validation", //
 				swizzler.getMaxCharLength(), //
 				swizzler.getDataSet("validation"), //
 				swizzler.getClassificationSet(), //
-				miniBatchSize);
+				miniBatchSize, //
+				swizzler.getCharMap());
 
 		rnn = new RecurrentNeuralNet(iterations, learningRate, 1, outputClassificationCnt, seed, regularizationL2);
 
@@ -93,6 +95,7 @@ public class Service {
 		evaluator.printStats();
 
 		for (int i = 0; i < 100000; i++) {
+			long start = System.currentTimeMillis();
 			trainDataSetIterator.reset();
 			validationDataSetIterator.reset();
 			// testDataSetIterator.reset();
@@ -103,7 +106,12 @@ public class Service {
 			validationDataSetIterator.reset();
 			// testDataSetIterator.reset();
 
-			evaluator.printStats();
+			double valAccuracy = evaluator.printStats();
+			if (i % 1 == 0) {
+				boolean saveUpdater = true;
+				rnn.saveModel("src/main/resources/models/model-iteration-" + i + "-valAccuracy-" + valAccuracy, saveUpdater);
+			}
+			System.out.println("interation train eval time " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 		}
 
 		Vertx vertx = Vertx.vertx();
