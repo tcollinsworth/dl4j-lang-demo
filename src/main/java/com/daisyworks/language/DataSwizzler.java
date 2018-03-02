@@ -296,7 +296,8 @@ public class DataSwizzler {
 				}
 				accumulateUniqueChars(sentence);
 				List<String> wordListOrdered = TokenizeSentenceIntoWords.tokenize(sentence);
-				WordNGramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords, ngrams);
+				SentenceNgramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords, ngrams);
+				// WordNGramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords, ngrams);
 			}
 			return ngrams;
 		} finally {

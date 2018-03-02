@@ -13,6 +13,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
@@ -69,13 +70,13 @@ public class RecurrentNeuralNet {
 
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.weightInit(WeightInit.XAVIER) //
-				// .updater(new Nesterovs(0.9)) //
-				// .dropOut(0.1)
+				.updater(new Nesterovs(0.9)) //
+				.dropOut(0.1) //
 
 				.updater(new RmsProp(0.95))
 				// .updater(Updater.ADAM) //
-				.regularization(true) //
-				.l2(regularizationL2) //
+				// .regularization(true) //
+				// .l2(regularizationL2) //
 				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
 				// .gradientNormalizationThreshold(1.0) // 0.5 1.0
 				// .trainingWorkspaceMode(WorkspaceMode.SINGLE) //
