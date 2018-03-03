@@ -7,6 +7,7 @@ import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -31,7 +32,8 @@ public class RecurrentNeuralNet {
 
 	public MultiLayerNetwork net;
 
-	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt, int seed, double regularizationL2) {
+	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt,
+			int seed, double regularizationL2) {
 		this.inputFeatureCnt = inputFeatureCnt;
 		this.outputClassificationCnt = outputClassificationCnt;
 
@@ -71,7 +73,7 @@ public class RecurrentNeuralNet {
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.weightInit(WeightInit.XAVIER) //
 				.updater(new Nesterovs(0.9)) //
-				.dropOut(0.1) //
+				// .dropOut(0.1) //
 
 				.updater(new RmsProp(0.95))
 				// .updater(Updater.ADAM) //
@@ -106,8 +108,8 @@ public class RecurrentNeuralNet {
 						.name("Output") //
 						.lossFunction(LossFunctions.LossFunction.MCXENT) //
 						.activation(Activation.SOFTMAX) //
-						// .weightInit(WeightInit.DISTRIBUTION) //
-						// .dist(new UniformDistribution(0, 1)) //
+						 .weightInit(WeightInit.DISTRIBUTION) //
+						 .dist(new UniformDistribution(0, 1)) //
 						.build()); //
 
 		// .layer(0, new GravesLSTM.Builder() //
@@ -151,7 +153,8 @@ public class RecurrentNeuralNet {
 			totalNumParams += nParams;
 		}
 		System.out.println("Total number of network parameters: " + totalNumParams);
-		System.out.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
+		System.out
+				.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
 	}
 
 	/**

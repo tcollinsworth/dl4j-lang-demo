@@ -34,7 +34,8 @@ public class DataSwizzler {
 	private static final String newExamplesDirRelativePath = "src/main/resources/examples";
 	private static final String dataSetStatsFileName = newExamplesDirRelativePath + File.separator + "dataSetStats.txt";
 	private static final String dataSetsFileName = newExamplesDirRelativePath + File.separator + "dataSets.txt";
-	private static final String classificationsFileName = newExamplesDirRelativePath + File.separator + "classifications.txt";
+	private static final String classificationsFileName = newExamplesDirRelativePath + File.separator
+			+ "classifications.txt";
 	private static final String charMapFileName = newExamplesDirRelativePath + File.separator + "charMap.txt";
 
 	private final String examplesRawRootDir;
@@ -47,7 +48,8 @@ public class DataSwizzler {
 	private final Map<String, List<Pair<String, String>>> dataSets;
 
 	private final Set<Integer> allCharInts = new HashSet<Integer>();
-	// key = char (int), val = char sorted order index from 0-n for all characters in training set
+	// key = char (int), val = char sorted order index from 0-n for all characters
+	// in training set
 	// encoded to uniform space eliminating gaps and outliers
 	private final Map<Character, Double> charMap = new HashMap<Character, Double>();
 
@@ -103,7 +105,8 @@ public class DataSwizzler {
 	private void persistClassifications() throws FileNotFoundException, IOException {
 		File examplesDataSetStatsFile = new File(classificationsFileName);
 
-		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
+		try (BufferedWriter w = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
 			classifications.forEach((c) -> {
 				try {
 					w.write(String.format("%s\n", c));
@@ -146,12 +149,14 @@ public class DataSwizzler {
 		File examplesCharMapFile = new File(charMapFileName);
 
 		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesCharMapFile)))) {
-			// Only persist chars we've trained on, best to exclude untrained chars on inference
+			// Only persist chars we've trained on, best to exclude untrained chars on
+			// inference
 			// for (int i = 10; i <= 255; i++) {
 			// w.write(String.format("%d:%d\n", i - 10, i));
 			// }
 			int[] i = { 0 };
-			// Arrays.asList(uniquChars).stream().filter((c) -> c > 255).forEach((c) -> persistChar(++i[0], c, w));
+			// Arrays.asList(uniquChars).stream().filter((c) -> c > 255).forEach((c) ->
+			// persistChar(++i[0], c, w));
 			Arrays.asList(uniquChars).forEach((c) -> persistChar(++i[0], c, w));
 		}
 	}
@@ -171,7 +176,8 @@ public class DataSwizzler {
 		File classificationsFile = new File(classificationsFileName);
 		File charMapFile = new File(charMapFileName);
 
-		if (!dataSetsFile.exists() || !dataSetStatsFile.exists() || !classificationsFile.exists() || !charMapFile.exists()) {
+		if (!dataSetsFile.exists() || !dataSetStatsFile.exists() || !classificationsFile.exists()
+				|| !charMapFile.exists()) {
 			return false;
 		}
 
@@ -229,11 +235,14 @@ public class DataSwizzler {
 		File examplesRawRootDirFile = new File(examplesRawRootDir);
 		Log.info("{}", Arrays.asList(examplesRawRootDirFile.list()));
 		Arrays.asList(examplesRawRootDirFile.list()).stream() //
-				.filter((classificationDir) -> new File(examplesRawRootDir + File.separator + classificationDir).isDirectory()) //
+				.filter((classificationDir) -> new File(examplesRawRootDir + File.separator + classificationDir)
+						.isDirectory()) //
 				.forEach((classificationDir) -> {
-					Set<String> ngrams = getNgrams(examplesRawRootDir + File.separator + classificationDir, minNgramWords, maxNgramWords);
+					Set<String> ngrams = getNgrams(examplesRawRootDir + File.separator + classificationDir,
+							minNgramWords, maxNgramWords);
 					String longestNgram = ngrams.stream().max((a, b) -> Integer.compare(a.length(), b.length())).get();
-					examplesMaxCharLength = longestNgram.length() > examplesMaxCharLength ? longestNgram.length() : examplesMaxCharLength;
+					examplesMaxCharLength = longestNgram.length() > examplesMaxCharLength ? longestNgram.length()
+							: examplesMaxCharLength;
 					randomSplitSampleData(classificationDir, ngrams);
 				});
 		persistDataSetStats(examplesMaxCharLength);
@@ -243,7 +252,8 @@ public class DataSwizzler {
 	private void persistDataSets() throws FileNotFoundException, IOException {
 		File examplesDataSetStatsFile = new File(newExamplesDirRelativePath + File.separator + "dataSets.txt");
 
-		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
+		try (BufferedWriter w = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
 			w.write(String.format("dataset,classification,ngram\n"));
 
 			dataSets.forEach((dataset, ngrams) -> {
@@ -262,7 +272,8 @@ public class DataSwizzler {
 	private static void persistDataSetStats(int maxExampleLength) throws FileNotFoundException, IOException {
 		File examplesDataSetStatsFile = new File(newExamplesDirRelativePath + File.separator + "dataSetStats.txt");
 
-		try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
+		try (BufferedWriter w = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(examplesDataSetStatsFile)))) {
 			w.write(String.format("%s:%d\n", "maxExampleLength", maxExampleLength));
 		}
 	}
@@ -297,7 +308,8 @@ public class DataSwizzler {
 				accumulateUniqueChars(sentence);
 				List<String> wordListOrdered = TokenizeSentenceIntoWords.tokenize(sentence);
 				SentenceNgramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords, ngrams);
-				// WordNGramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords, ngrams);
+				// WordNGramTokenizer.tokenize(wordListOrdered, minNgramWords, maxNgramWords,
+				// ngrams);
 			}
 			return ngrams;
 		} finally {

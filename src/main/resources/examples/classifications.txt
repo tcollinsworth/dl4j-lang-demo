@@ -1,0 +1,7 @@
+dutch
+german
+spanish
+english
+italian
+french
+welsh

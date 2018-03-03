@@ -1,21 +1,7 @@
-Create/persist/load unique char map
-
-persist model every 'n' training iterations
-
-load model feature
-
+load model 
 inference endpoint
-
-more examples
 
 train/evaluate
 create demo UI
 support adding additional training examples
 upload for other language data
-
-
-create more examples
------------------------------
-read from sentence generator - gutenburg
-call google translate
-persist
