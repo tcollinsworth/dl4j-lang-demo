@@ -75,7 +75,7 @@ public class RecurrentNeuralNet {
 				.updater(new Nesterovs(0.9)) //
 				// .dropOut(0.1) //
 
-				.updater(new RmsProp(0.95))
+				.updater(new RmsProp(0.95)) //
 				// .updater(Updater.ADAM) //
 				// .regularization(true) //
 				// .l2(regularizationL2) //
@@ -111,30 +111,7 @@ public class RecurrentNeuralNet {
 						 .weightInit(WeightInit.DISTRIBUTION) //
 						 .dist(new UniformDistribution(0, 1)) //
 						.build()); //
-
-		// .layer(0, new GravesLSTM.Builder() //
-		// .nIn(inputFeatureCnt) //
-		// .nOut(hiddenNodes) //
-		// .name("Input") //
-		// .activation(Activation.TANH) //
-		// .build()) //
-		//
-		// .layer(1, new GravesLSTM.Builder() //
-		// .nIn(hiddenNodes) //
-		// .nOut(hiddenNodes) //
-		// .name("Hidden") //
-		// .activation(Activation.TANH) //
-		// .build()) //
-		//
-		// .layer(2, new RnnOutputLayer.Builder() //
-		// .nIn(hiddenNodes) //
-		// .nOut(outputClassificationCnt) //
-		// .name("Output") //
-		// .lossFunction(LossFunctions.LossFunction.MCXENT) //
-		// .activation(Activation.SOFTMAX) //
-		// // .weightInit(WeightInit.DISTRIBUTION) //
-		// // .dist(new UniformDistribution(0, 1)) //
-		// .build()); //
+		
 		listBuilder //
 				.backpropType(BackpropType.TruncatedBPTT) //
 				.tBPTTBackwardLength(tbpttLength) //

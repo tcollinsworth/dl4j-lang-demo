@@ -5,3 +5,5 @@ train/evaluate
 create demo UI
 support adding additional training examples
 upload for other language data
+
+TODO try other updaters like SGD
