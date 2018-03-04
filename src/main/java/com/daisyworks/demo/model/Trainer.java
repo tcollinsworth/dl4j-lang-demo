@@ -1,8 +1,8 @@
 package com.daisyworks.demo.model;
 
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import java.io.IOException;
 
-import com.daisyworks.demo.Service;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 /**
  * @author troy
@@ -22,8 +22,30 @@ public class Trainer {
 		// Nd4j.getMemoryManager().togglePeriodicGc(false);
 	}
 
-	public void train(Service service) {
-		// rnn.net.fit(service.trainColoData.features, service.trainColoData.classifications);
+	public void train(DataSetIterator trainDataSetIterator, DataSetIterator validationDataSetIterator, Evaluator evaluator) throws IOException {
+		Evaluator.printStatsHeader();
+		evaluator.printStats();
+
+		for (int i = 0; i < 100000; i++) {
+			// long start = System.currentTimeMillis();
+			trainDataSetIterator.reset();
+			validationDataSetIterator.reset();
+			// testDataSetIterator.reset();
+
+			fit(trainDataSetIterator);
+
+			trainDataSetIterator.reset();
+			validationDataSetIterator.reset();
+			// testDataSetIterator.reset();
+
+			double valAccuracy = evaluator.printStats();
+			if (i % 10 == 0) {
+				boolean saveUpdater = true;
+				rnn.saveModel("src/main/resources/models/model-iteration-" + i + "-valAccuracy-" + valAccuracy + ".zip", saveUpdater);
+			}
+			// System.out.println("interation train eval time " + ((System.currentTimeMillis() - start) / 1000) +
+			// " sec");
+		}
 	}
 
 	int fitCnt = 0;

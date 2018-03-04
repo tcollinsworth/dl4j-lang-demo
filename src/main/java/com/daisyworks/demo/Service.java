@@ -91,30 +91,6 @@ public class Service {
 
 		evaluator.createAndRegisterEvaluationReporter();
 
-		Evaluator.printStatsHeader();
-		evaluator.printStats();
-
-		for (int i = 0; i < 100000; i++) {
-			// long start = System.currentTimeMillis();
-			trainDataSetIterator.reset();
-			validationDataSetIterator.reset();
-			// testDataSetIterator.reset();
-
-			trainer.fit(trainDataSetIterator);
-
-			trainDataSetIterator.reset();
-			validationDataSetIterator.reset();
-			// testDataSetIterator.reset();
-
-			double valAccuracy = evaluator.printStats();
-			if (i % 10 == 0) {
-				boolean saveUpdater = true;
-				rnn.saveModel("src/main/resources/models/model-iteration-" + i + "-valAccuracy-" + valAccuracy, saveUpdater);
-			}
-			// System.out.println("interation train eval time " + ((System.currentTimeMillis() - start) / 1000) +
-			// " sec");
-		}
-
 		Vertx vertx = Vertx.vertx();
 		Router router = Router.router(vertx);
 		router.route().handler(BodyHandler.create());
@@ -131,5 +107,9 @@ public class Service {
 				System.exit(-1);
 			}
 		});
+	}
+
+	public void train() throws IOException {
+		trainer.train(trainDataSetIterator, validationDataSetIterator, evaluator);
 	}
 }

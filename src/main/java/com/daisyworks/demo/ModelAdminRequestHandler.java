@@ -22,8 +22,8 @@ public class ModelAdminRequestHandler extends RequestHandler {
 
 		try {
 			if (fitModel) {
-				service.trainer.fit(service.trainDataSetIterator);
-				System.out.println("Saved model: " + modelFilename);
+				service.train();
+				System.out.println("Fitting model: " + modelFilename);
 			}
 
 			if (saveModel) {
@@ -31,7 +31,7 @@ public class ModelAdminRequestHandler extends RequestHandler {
 					rc.response().setStatusCode(500).end("no filename");
 					return;
 				}
-				service.rnn.saveModel(modelFilename + ".zip", true);
+				service.rnn.saveModel("src/main/resources/models/" + modelFilename + ".zip", true);
 				System.out.println("Saved model: " + modelFilename);
 			}
 
@@ -45,7 +45,7 @@ public class ModelAdminRequestHandler extends RequestHandler {
 					rc.response().setStatusCode(500).end("no filename");
 					return;
 				}
-				service.rnn.restoreModel(modelFilename + ".zip", true);
+				service.rnn.restoreModel("src/main/resources/models/" + modelFilename + ".zip", true);
 				System.out.println("Loaded model: " + modelFilename);
 			}
 
