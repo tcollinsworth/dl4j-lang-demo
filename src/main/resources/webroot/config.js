@@ -28,12 +28,17 @@ const Config = (function() {
     return urlPrefix
   }
 
+  function getLangInferenceUrl() {
+    return urlPrefix + 'lang-inference'
+  }
+
   function getModelAdminUrl() {
-    return urlPrefix + 'modelAdmin'
+    return urlPrefix + 'model-admin'
   }
 
   return {
     getBaseUrl,
+    getLangInferenceUrl,
     getModelAdminUrl
   }
 })()

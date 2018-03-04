@@ -4,6 +4,16 @@ $(document).ready(function(){
     alert("Error retry\r\n" + JSON.stringify(jqxhr, null, '  '))
   }
 
+  $('#infer').click(function() {
+    postData(Config.getLangInferenceUrl(), {text: $('#example').val()},
+      function(data, textStatus, jqxhr) {
+        alert("Prediction " + JSON.stringify(data))
+      },
+      function(jqxhr, textStatus, error) {
+        alert("Error saving model\r\n" +  JSON.stringify(jqxhr, null, '  '))
+      })
+  })
+
   $('#reset').click(function() {
     postData(Config.getModelAdminUrl(), {resetModel: true},
       function(data, textStatus, jqxhr) {
