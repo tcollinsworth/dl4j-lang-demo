@@ -32,8 +32,7 @@ public class RecurrentNeuralNet {
 
 	public MultiLayerNetwork net;
 
-	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt,
-			int seed, double regularizationL2) {
+	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt, int seed, double regularizationL2) {
 		this.inputFeatureCnt = inputFeatureCnt;
 		this.outputClassificationCnt = outputClassificationCnt;
 
@@ -72,17 +71,19 @@ public class RecurrentNeuralNet {
 
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
 				.weightInit(WeightInit.XAVIER) //
-				.updater(new Nesterovs(0.9)) //
-				// .dropOut(0.1) //
+				.updater(new Nesterovs(0.9)) // auto-reduce learning rate as approaches solution
+				// .dropOut(0.1) // reduce ovefitting
+				// .useDropConnect(true); // reduce ovefitting
 
 				.updater(new RmsProp(0.95)) //
 				// .updater(Updater.ADAM) //
-				// .regularization(true) //
-				// .l2(regularizationL2) //
-				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) //
-				// .gradientNormalizationThreshold(1.0) // 0.5 1.0
-				// .trainingWorkspaceMode(WorkspaceMode.SINGLE) //
-				// .inferenceWorkspaceMode(WorkspaceMode.SINGLE) //
+				// .regularization(true) // reduce ovefitting
+				// .l2(regularizationL2) // reduce ovefitting
+				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) // reduce
+				// exploding/vanishing gradient issues
+				// .gradientNormalizationThreshold(1.0) // 0.5 1.0 // reduce exploding/vanishing gradient issues
+				// .trainingWorkspaceMode(WorkspaceMode.SINGLE) // reduce GC overhead
+				// .inferenceWorkspaceMode(WorkspaceMode.SINGLE) // reduce GC overhead
 				.list() //
 
 				.pretrain(false) //
@@ -108,14 +109,14 @@ public class RecurrentNeuralNet {
 						.name("Output") //
 						.lossFunction(LossFunctions.LossFunction.MCXENT) //
 						.activation(Activation.SOFTMAX) //
-						 .weightInit(WeightInit.DISTRIBUTION) //
-						 .dist(new UniformDistribution(0, 1)) //
+						.weightInit(WeightInit.DISTRIBUTION) //
+						.dist(new UniformDistribution(0, 1)) //
 						.build()); //
-		
+
 		listBuilder //
-				.backpropType(BackpropType.TruncatedBPTT) //
-				.tBPTTBackwardLength(tbpttLength) //
-				.tBPTTForwardLength(tbpttLength);
+				.backpropType(BackpropType.TruncatedBPTT) // limits RNN history to reduce computation overhead
+				.tBPTTBackwardLength(tbpttLength) // limits RNN history to reduce computation overhead
+				.tBPTTForwardLength(tbpttLength); // limits RNN history to reduce computation overhead
 
 		MultiLayerNetwork net = new MultiLayerNetwork(listBuilder.build());
 		net.init();
@@ -130,8 +131,7 @@ public class RecurrentNeuralNet {
 			totalNumParams += nParams;
 		}
 		System.out.println("Total number of network parameters: " + totalNumParams);
-		System.out
-				.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
+		System.out.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
 	}
 
 	/**

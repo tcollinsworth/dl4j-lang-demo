@@ -1,4 +1,10 @@
-load model 
+*** create a test dataset that is not ambiguous
+
+admin
+  load model ***
+  evaluate *** validation/test
+  reset
+  train
 inference endpoint
 
 train/evaluate
@@ -7,3 +13,12 @@ support adding additional training examples
 upload for other language data
 
 TODO try other updaters like SGD
+
+
+The accuracy is higher than the ~90% that is currently being reported.
+Examples are all 1 to 3 word ngrams which is a significant portion - percent depends on avg. length of examples.
+While single word ngrams are useful for training/performance, they skew the results during validation.
+They don't cause issues with actual learning because the neural net learns ambiguous inputs and reports ambiguity in predictions - this is a VERY desirable trait. 
+Many words are the same across languages like la, el, etc., and names, e.g., Alice - Alice In Wonderland was in examples.
+When single word examples are scored during test data evaluation and randomly selected as validation examples for measuring accuracy, they are statistically incorrect ~n/7ths the time - 7 languages.
+To account for this, and get true accuracy, need to use only non-ambiguous examples for validation/generalization evaluation. When selecting examples need to test that they only map to one language.
