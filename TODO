@@ -1,19 +1,8 @@
+UI that can load model
+UI that can infer example
+UI to output train/validation/test evaluation
+
 *** create a test dataset that is not ambiguous
-
-admin
-  load model ***
-  evaluate *** validation/test
-  reset
-  train
-inference endpoint
-
-train/evaluate
-create demo UI
-support adding additional training examples
-upload for other language data
-
-TODO try other updaters like SGD
-
 
 The accuracy is higher than the ~90% that is currently being reported.
 Examples are all 1 to 3 word ngrams which is a significant portion - percent depends on avg. length of examples.
