@@ -36,6 +36,7 @@ public class Service {
 
 	public int inputFeatureCnt; // characters
 	public int outputClassificationCnt; // classifications
+	public String[] classifications;
 
 	// The char length of longest example for truncating/padding
 	public int maxExampleLength;
@@ -66,6 +67,7 @@ public class Service {
 		swizzler.loadData();
 
 		outputClassificationCnt = swizzler.getClassificationSet().size();
+		classifications = swizzler.getClassificationSet().toArray(new String[0]);
 
 		trainDataSetIterator = new ExampleCharSeqAsDoubleEncodedVectorDataSetIterator( //
 				"train", //
@@ -85,7 +87,7 @@ public class Service {
 
 		rnn = new RecurrentNeuralNet(iterations, learningRate, 1, outputClassificationCnt, seed, regularizationL2);
 
-		inferrer = new Inferrer(rnn);
+		inferrer = new Inferrer(rnn, swizzler.getCharMap(), this);
 		trainer = new Trainer(rnn);
 		evaluator = new Evaluator(rnn, trainDataSetIterator, validationDataSetIterator, testDataSetIterator);
 
@@ -110,5 +112,9 @@ public class Service {
 
 	public void train() throws IOException {
 		trainer.train(trainDataSetIterator, validationDataSetIterator, evaluator);
+	}
+
+	public String[] getClassifications() {
+		return classifications;
 	}
 }

@@ -1,7 +1,10 @@
 package com.daisyworks.demo;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+
+import com.daisyworks.demo.model.Inferrer.Output;
 
 /**
  * @author troy
@@ -15,33 +18,23 @@ public class LangRequestHandler extends RequestHandler {
 
 	@Override
 	public void handle() {
-		// String stats = service.evaluator.grade(service);
-
 		JsonObject respObj = getLangInference(service, bodyJson);
-		// respObj.put("stats", stats);
-
 		rc.response().end(respObj.encode());
 	}
 
 	private JsonObject getLangInference(Service service, JsonObject bodyJson) {
-		String rawExample = bodyJson.getString("example");
+		String rawExample = bodyJson.getString("text");
 
-		// Observation inputs = service.nn.new Observation(ColorDiscriminator, scaledRGB[0], scaledRGB[1], scaledRGB[2],
-		// 0);
+		Output output = service.inferrer.infer(rawExample);
 
-		// Output output = service.inferrer.infer(inputs);
-
-		// int classificationIdx = output.outputs[0];
-		// String color = Colors.values()[classificationIdx].name();
+		String lang = service.getClassifications()[output.classificationIdx];
 
 		JsonObject respObj = new JsonObject();
-		// respObj.put("lang", lang);
-		respObj.put("lang", "English");
-		// JsonArray classProbabilities = new JsonArray(output.classificationProbabilities);
-		// respObj.put("colorProbabilities", classProbabilities);
-		// respObj.put("timeMs", output.timeMs);
+		respObj.put("lang", lang);
 
-		// System.out.println(String.format("reponse: %s, %s, %s", respObj.encode(), rgbJsonArray, color));
+		JsonArray classProbabilities = new JsonArray(output.classificationProbabilities);
+		respObj.put("langProbabilities", classProbabilities);
+		respObj.put("timeMs", output.timeMs);
 
 		return respObj;
 	}

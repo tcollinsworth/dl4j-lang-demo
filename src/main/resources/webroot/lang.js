@@ -7,12 +7,29 @@ $(document).ready(function(){
   $('#infer').click(function() {
     postData(Config.getLangInferenceUrl(), {text: $('#example').val()},
       function(data, textStatus, jqxhr) {
-        alert("Prediction " + JSON.stringify(data))
+        //alert("Prediction " + JSON.stringify(data))
+        updatePredictions(data)
       },
       function(jqxhr, textStatus, error) {
         alert("Error saving model\r\n" +  JSON.stringify(jqxhr, null, '  '))
       })
   })
+
+  function updatePredictions(data) {
+    $('#predictions').empty()
+    data.langProbabilities.forEach(function(p) {
+      var parts = p.split(':');
+      const lang = parts[0]
+      const prob = parseFloat(parts[1]).toFixed(2)
+      if (lang === data.lang) {
+        $('#predictions').append("<span style='background-color:#bcefa5;'>" + prob + " " + lang + "</span><br>")
+      } else {
+        $('#predictions').append("<span'>" + prob + " " + lang + "</span><br>")
+      }
+    })
+    $('#predictions').append("<span'>" + parseFloat(data.timeMs).toFixed(2) + " ms</span><br>")
+    //alert("Predict: " + data.lang)
+  }
 
   $('#reset').click(function() {
     postData(Config.getModelAdminUrl(), {resetModel: true},
