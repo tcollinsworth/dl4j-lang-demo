@@ -14,7 +14,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
@@ -64,19 +63,21 @@ public class RecurrentNeuralNet {
 		int hiddenNodes = 40;
 		int tbpttLength = 50;
 
+		// https://deeplearning4j.org/features //optimzation algorithms, updaters, hyperparameters, Loss/Objective
+		// functions, Activation Functions
 		NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder() //
 				.iterations(iterations) //
 				.learningRate(learningRate) //
 				.seed(seed) //
 
-				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) //
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) // default
 				.weightInit(WeightInit.XAVIER) //
-				.updater(new Nesterovs(0.9)) // auto-reduce learning rate as approaches solution
+				// .updater(new Nesterovs(0.9)) // auto-reduce learning rate as approaches solution
 				// .dropOut(0.1) // reduce ovefitting
 				// .useDropConnect(true); // reduce ovefitting
 
 				.updater(new RmsProp(0.95)) //
-				// .updater(Updater.ADAM) //
+				// .updater(Updater.ADAM) // Adaptive Momentum - Combines AdaGrad and RmsProp
 				// .regularization(true) // reduce ovefitting
 				// .l2(regularizationL2) // reduce ovefitting
 				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) // reduce
