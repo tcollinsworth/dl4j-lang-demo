@@ -63,7 +63,7 @@ public class Inferrer {
 		rnn.net.rnnClearPreviousState();
 		// Output dimensions [miniBatchSize,outputSize] or 1 x 7 languages
 		INDArray outputs = rnn.net.rnnTimeStep(input);
-		System.out.println(outputs);
+		// System.out.println(outputs);
 
 		// System.out.println(outputs.length);
 		// System.out.println(Arrays.toString(outputs));
@@ -76,7 +76,7 @@ public class Inferrer {
 	}
 
 	private Output getOutput(INDArray outputs, int inputTimeSeriesLength, float timeMs) {
-		System.out.println(outputs.shapeInfoToString());
+		// System.out.println(outputs.shapeInfoToString());
 		INDArrayIndex[] lastProbIndices = new INDArrayIndex[] { //
 		NDArrayIndex.all(), NDArrayIndex.all(), //
 				NDArrayIndex.point(inputTimeSeriesLength - 1) };
@@ -91,18 +91,20 @@ public class Inferrer {
 				classificationIdx = i;
 			}
 		}
-		return new Output(classificationIdx, lastProbabilities, timeMs);
+		return new Output(classificationIdx, lastProbabilities, timeMs, outputs.toString());
 	}
 
 	public static class Output {
 		public final int classificationIdx;
 		public final List<String> classificationProbabilities;
 		public final float timeMs;
+		public final String probMatrix;
 
-		public Output(int classificationIdx, List<String> classificationProbabilities, float timeMs) {
+		public Output(int classificationIdx, List<String> classificationProbabilities, float timeMs, String probMatrix) {
 			this.classificationIdx = classificationIdx;
 			this.classificationProbabilities = classificationProbabilities;
 			this.timeMs = timeMs;
+			this.probMatrix = probMatrix;
 		}
 	}
 }

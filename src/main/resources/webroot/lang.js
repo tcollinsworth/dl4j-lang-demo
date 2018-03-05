@@ -17,6 +17,7 @@ $(document).ready(function(){
 
   function updatePredictions(data) {
     $('#predictions').empty()
+    $('#probMatrix').empty()
     data.langProbabilities.forEach(function(p) {
       var parts = p.split(':');
       const lang = parts[0]
@@ -28,6 +29,9 @@ $(document).ready(function(){
       }
     })
     $('#predictions').append("<span'>" + parseFloat(data.timeMs).toFixed(2) + " ms</span><br>")
+
+    const probMatrix = data.probMatrix.replace(/], /g, '],<br>')
+    $('#probMatrix').append(probMatrix)
     //alert("Predict: " + data.lang)
   }
 

@@ -35,6 +35,9 @@ public class LangRequestHandler extends RequestHandler {
 		JsonArray classProbabilities = new JsonArray(output.classificationProbabilities);
 		respObj.put("langProbabilities", classProbabilities);
 		respObj.put("timeMs", output.timeMs);
+		respObj.put("probMatrix", output.probMatrix);
+		System.out.println(output.probMatrix);
+		System.out.println(respObj);
 
 		return respObj;
 	}
