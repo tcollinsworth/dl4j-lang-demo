@@ -39,7 +39,7 @@ public class Trainer {
 			// testDataSetIterator.reset();
 
 			double valAccuracy = evaluator.printStats();
-			if (i % 10 == 0) {
+			if (i % 5 == 0) {
 				boolean saveUpdater = true;
 				rnn.saveModel("src/main/resources/models/model-iteration-" + i + "-valAccuracy-" + valAccuracy + ".zip", saveUpdater);
 			}

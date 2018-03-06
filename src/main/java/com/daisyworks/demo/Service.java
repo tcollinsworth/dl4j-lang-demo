@@ -28,7 +28,7 @@ public class Service {
 
 	private final int PORT = 8181;
 
-	public final int miniBatchSize = 32;
+	public final int miniBatchSize = 1024;
 	private final int seed = 123;
 	private final int iterations = 1;
 	private final double learningRate = 0.1; // 0.1; // 0.02;
@@ -92,6 +92,8 @@ public class Service {
 		evaluator = new Evaluator(rnn, trainDataSetIterator, validationDataSetIterator, testDataSetIterator);
 
 		evaluator.createAndRegisterEvaluationReporter();
+		
+		trainer.train(trainDataSetIterator, validationDataSetIterator, evaluator);
 
 		Vertx vertx = Vertx.vertx();
 		Router router = Router.router(vertx);
