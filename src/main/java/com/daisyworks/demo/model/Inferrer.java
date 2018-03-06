@@ -76,35 +76,44 @@ public class Inferrer {
 	}
 
 	private Output getOutput(INDArray outputs, int inputTimeSeriesLength, float timeMs) {
-		// System.out.println(outputs.shapeInfoToString());
-		INDArrayIndex[] lastProbIndices = new INDArrayIndex[] { //
-		NDArrayIndex.all(), NDArrayIndex.all(), //
-				NDArrayIndex.point(inputTimeSeriesLength - 1) };
-		INDArray lastClassificationProbabilities = outputs.get(lastProbIndices);
-		int classificationIdx = -1;
-		double maxProbability = 0.0;
-		List<String> lastProbabilities = new ArrayList<>();
-		for (int i = 0; i < service.getClassifications().length; i++) {
-			lastProbabilities.add(service.getClassifications()[i] + ":" + lastClassificationProbabilities.getFloat(i));
-			if (lastClassificationProbabilities.getDouble(i) > maxProbability) {
-				maxProbability = lastClassificationProbabilities.getDouble(i);
-				classificationIdx = i;
-			}
-		}
-		return new Output(classificationIdx, lastProbabilities, timeMs, outputs.toString());
+		return new Output(timeMs, outputs);
 	}
 
-	public static class Output {
-		public final int classificationIdx;
-		public final List<String> classificationProbabilities;
+	public class Output {
+		public int classificationIdx = 0;
+		public final List<String> classificationProbabilities = new ArrayList<>();
 		public final float timeMs;
 		public final String probMatrix;
 
-		public Output(int classificationIdx, List<String> classificationProbabilities, float timeMs, String probMatrix) {
-			this.classificationIdx = classificationIdx;
-			this.classificationProbabilities = classificationProbabilities;
+		public Output(float timeMs, INDArray outputMatrix) {
 			this.timeMs = timeMs;
-			this.probMatrix = probMatrix;
+			this.probMatrix = outputMatrix.toString();
+
+			//System.out.println(outputMatrix.shapeInfoToString());
+
+			INDArrayIndex[] probIndices = new INDArrayIndex[] { //
+					NDArrayIndex.point(0), //
+					NDArrayIndex.all(), //
+					NDArrayIndex.all(), //
+			};
+			INDArray probMatrix = outputMatrix.get(probIndices);
+
+			float[] classProbs = new float[probMatrix.rows()];
+			for (int classIdx = 0; classIdx < probMatrix.rows(); classIdx++) {
+				for (int charSeqIdx = 0; charSeqIdx < probMatrix.columns(); charSeqIdx++) {
+					classProbs[classIdx] += probMatrix.getFloat(classIdx, charSeqIdx);
+				}
+			}
+
+			float maxClassProb = 0;
+			for (int classIdx = 0; classIdx < probMatrix.rows(); classIdx++) {
+				classProbs[classIdx] = classProbs[classIdx] / probMatrix.columns();
+				classificationProbabilities.add(service.getClassifications()[classIdx] + ":" + classProbs[classIdx]);
+				if (classProbs[classIdx] > maxClassProb) {
+					maxClassProb = classProbs[classIdx];
+					classificationIdx = classIdx;
+				}
+			}
 		}
 	}
 }

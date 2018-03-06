@@ -1,10 +1,10 @@
 package com.daisyworks.demo;
 
+import com.daisyworks.demo.model.Inferrer.Output;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-
-import com.daisyworks.demo.model.Inferrer.Output;
 
 /**
  * @author troy
@@ -36,8 +36,8 @@ public class LangRequestHandler extends RequestHandler {
 		respObj.put("langProbabilities", classProbabilities);
 		respObj.put("timeMs", output.timeMs);
 		respObj.put("probMatrix", output.probMatrix);
-		System.out.println(output.probMatrix);
-		System.out.println(respObj);
+		// System.out.println(output.probMatrix);
+		// System.out.println(respObj);
 
 		return respObj;
 	}

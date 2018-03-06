@@ -26,7 +26,7 @@ public class Service {
 	private final int minNgramWords = 1;
 	private final int maxNgramWords = 3;
 
-	private final int PORT = 8080;
+	private final int PORT = 8181;
 
 	public final int miniBatchSize = 32;
 	private final int seed = 123;
