@@ -1,4 +1,5 @@
-UI that can infer example
+status UI or jmx that shows current training iterator progress - where is it now and how long will it take to complete epoch
+
 UI to output train/validation/test evaluation
 
 *** create a test dataset that is not ambiguous

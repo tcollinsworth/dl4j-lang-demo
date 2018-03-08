@@ -93,7 +93,7 @@ public class Service {
 
 		evaluator.createAndRegisterEvaluationReporter();
 		
-		trainer.train(trainDataSetIterator, validationDataSetIterator, evaluator);
+		//trainer.train(trainDataSetIterator, validationDataSetIterator, evaluator);
 
 		Vertx vertx = Vertx.vertx();
 		Router router = Router.router(vertx);
