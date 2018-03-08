@@ -28,7 +28,7 @@ public class Service {
 
 	private final int PORT = 8181;
 
-	public final int miniBatchSize = 1024;
+	public final int miniBatchSize = 64;
 	private final int seed = 123;
 	private final int iterations = 1;
 	private final double learningRate = 0.1; // 0.1; // 0.02;

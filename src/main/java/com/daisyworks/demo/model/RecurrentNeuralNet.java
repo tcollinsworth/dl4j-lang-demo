@@ -7,7 +7,6 @@ import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
@@ -15,6 +14,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -60,7 +60,7 @@ public class RecurrentNeuralNet {
 	 * Create a brand new model.
 	 */
 	public void initializeNewModel() {
-		int hiddenNodes = 40;
+		int hiddenNodes = 80;
 		int tbpttLength = 50;
 
 		// https://deeplearning4j.org/features //optimzation algorithms, updaters, hyperparameters, Loss/Objective
@@ -76,8 +76,8 @@ public class RecurrentNeuralNet {
 				// .dropOut(0.1) // reduce ovefitting
 				// .useDropConnect(true); // reduce ovefitting
 
-				//.updater(new RmsProp(0.95)) //
-				.updater(Updater.ADAM) // Adaptive Momentum - Combines AdaGrad and RmsProp
+				.updater(new RmsProp(0.95)) //
+				//.updater(Updater.ADAM) // Adaptive Momentum - Combines AdaGrad and RmsProp
 				// .regularization(true) // reduce ovefitting
 				// .l2(regularizationL2) // reduce ovefitting
 				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) // reduce

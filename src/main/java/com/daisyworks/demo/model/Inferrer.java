@@ -98,16 +98,18 @@ public class Inferrer {
 			};
 			INDArray probMatrix = outputMatrix.get(probIndices);
 
+			//Give earlier char probabilities lower weight, later char probabilities more weight
+			int multiplierCnt = (probMatrix.columns() * (probMatrix.columns() + 1)) / 2; // * charSeqIdx+1 | * 1,2,3,n+1
 			float[] classProbs = new float[probMatrix.rows()];
 			for (int classIdx = 0; classIdx < probMatrix.rows(); classIdx++) {
 				for (int charSeqIdx = 0; charSeqIdx < probMatrix.columns(); charSeqIdx++) {
-					classProbs[classIdx] += probMatrix.getFloat(classIdx, charSeqIdx);
+					classProbs[classIdx] += (probMatrix.getFloat(classIdx, charSeqIdx) * (charSeqIdx+1)); 
 				}
 			}
 
 			float maxClassProb = 0;
 			for (int classIdx = 0; classIdx < probMatrix.rows(); classIdx++) {
-				classProbs[classIdx] = classProbs[classIdx] / probMatrix.columns();
+				classProbs[classIdx] = classProbs[classIdx] / multiplierCnt; //probMatrix.columns();
 				classificationProbabilities.add(service.getClassifications()[classIdx] + ":" + classProbs[classIdx]);
 				if (classProbs[classIdx] > maxClassProb) {
 					maxClassProb = classProbs[classIdx];
