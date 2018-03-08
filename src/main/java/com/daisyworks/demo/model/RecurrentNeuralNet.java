@@ -60,7 +60,7 @@ public class RecurrentNeuralNet {
 	 * Create a brand new model.
 	 */
 	public void initializeNewModel() {
-		int hiddenNodes = 80;
+		int hiddenNodes = 40;
 		int tbpttLength = 50;
 
 		// https://deeplearning4j.org/features //optimzation algorithms, updaters, hyperparameters, Loss/Objective

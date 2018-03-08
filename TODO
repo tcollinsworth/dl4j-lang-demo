@@ -1,4 +1,5 @@
 status UI or jmx that shows current training iterator progress - where is it now and how long will it take to complete epoch
+UI that visualizes node weights and biases as grey scale image per Geoff Hinton.
 
 UI to output train/validation/test evaluation
 

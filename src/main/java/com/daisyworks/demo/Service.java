@@ -34,7 +34,7 @@ public class Service {
 	private final double learningRate = 0.1; // 0.1; // 0.02;
 	private final double regularizationL2 = 0.00001;
 
-	public int inputFeatureCnt; // characters
+	public int inputFeatureCnt = 1; // characters
 	public int outputClassificationCnt; // classifications
 	public String[] classifications;
 
@@ -85,7 +85,7 @@ public class Service {
 				miniBatchSize, //
 				swizzler.getCharMap());
 
-		rnn = new RecurrentNeuralNet(iterations, learningRate, 1, outputClassificationCnt, seed, regularizationL2);
+		rnn = new RecurrentNeuralNet(iterations, learningRate, inputFeatureCnt, outputClassificationCnt, seed, regularizationL2);
 
 		inferrer = new Inferrer(rnn, swizzler.getCharMap(), this);
 		trainer = new Trainer(rnn);
