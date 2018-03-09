@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.BackpropType;
+import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
@@ -31,7 +32,8 @@ public class RecurrentNeuralNet {
 
 	public MultiLayerNetwork net;
 
-	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt, int seed, double regularizationL2) {
+	public RecurrentNeuralNet(int iterations, double learningRate, int inputFeatureCnt, int outputClassificationCnt,
+			int seed, double regularizationL2) {
 		this.inputFeatureCnt = inputFeatureCnt;
 		this.outputClassificationCnt = outputClassificationCnt;
 
@@ -63,7 +65,8 @@ public class RecurrentNeuralNet {
 		int hiddenNodes = 40;
 		int tbpttLength = 50;
 
-		// https://deeplearning4j.org/features //optimzation algorithms, updaters, hyperparameters, Loss/Objective
+		// https://deeplearning4j.org/features //optimzation algorithms, updaters,
+		// hyperparameters, Loss/Objective
 		// functions, Activation Functions
 		NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder() //
 				.iterations(iterations) //
@@ -72,17 +75,18 @@ public class RecurrentNeuralNet {
 
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT) // default
 				.weightInit(WeightInit.XAVIER) //
-				// .updater(new Nesterovs(0.9)) // auto-reduce learning rate as approaches solution
+				// .updater(new Nesterovs(0.9)) // auto-reduce learning rate as approaches
+				// solution
 				// .dropOut(0.1) // reduce ovefitting
 				// .useDropConnect(true); // reduce ovefitting
 
 				.updater(new RmsProp(0.95)) //
-				//.updater(Updater.ADAM) // Adaptive Momentum - Combines AdaGrad and RmsProp
+				// .updater(Updater.ADAM) // Adaptive Momentum - Combines AdaGrad and RmsProp
 				// .regularization(true) // reduce ovefitting
 				// .l2(regularizationL2) // reduce ovefitting
-				// .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) // reduce
+				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue) // reduce
 				// exploding/vanishing gradient issues
-				// .gradientNormalizationThreshold(1.0) // 0.5 1.0 // reduce exploding/vanishing gradient issues
+				.gradientNormalizationThreshold(5.0) // 0.5 1.0 // reduce exploding/vanishing gradient issues
 				// .trainingWorkspaceMode(WorkspaceMode.SINGLE) // reduce GC overhead
 				// .inferenceWorkspaceMode(WorkspaceMode.SINGLE) // reduce GC overhead
 				.list() //
@@ -103,6 +107,13 @@ public class RecurrentNeuralNet {
 						.name("Hidden") //
 						.activation(Activation.TANH) //
 						.build()) //
+
+				// .layer(2, new GravesLSTM.Builder() //
+				// .nIn(hiddenNodes) //
+				// .nOut(20) //
+				// .name("Hidden") //
+				// .activation(Activation.TANH) //
+				// .build()) //
 
 				.layer(2, new RnnOutputLayer.Builder() //
 						.nIn(hiddenNodes) //
@@ -132,7 +143,8 @@ public class RecurrentNeuralNet {
 			totalNumParams += nParams;
 		}
 		System.out.println("Total number of network parameters: " + totalNumParams);
-		System.out.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
+		System.out
+				.println(String.format("features: %d, classifications: %d", inputFeatureCnt, outputClassificationCnt));
 	}
 
 	/**
